@@ -7,14 +7,6 @@ import java.util.Scanner;
 public class ManagerClient {
 
 	public static void main(String[] args){
-		try{
-
-			//TODO:与FE的连接
-
-		} catch (Exception e) {
-			System.out.println("ERROR : " + e) ;
-			e.printStackTrace(System.out);
-		}
 
 		String managerID;
 		System.out.print("Enter Manager ID: ");
