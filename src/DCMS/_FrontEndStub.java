@@ -167,7 +167,7 @@ public class _FrontEndStub extends org.omg.CORBA.portable.ObjectImpl implements 
 
   // Type-specific CORBA::Object operations
   private static String[] __ids = {
-    "IDL:DCMS/FrontEnd:1.0"};
+    "IDL:DCMS/FrontEndImp:1.0"};
 
   public String[] _ids ()
   {

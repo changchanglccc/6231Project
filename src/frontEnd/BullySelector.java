@@ -16,9 +16,8 @@ public class BullySelector {
 
     public static BullySelector getBullySelector(){
         if(bullySelector==null)
-            return new BullySelector();
-        else
-            return bullySelector;
+            bullySelector=new BullySelector();
+        return bullySelector;
     }
 
     private CenterServer electing(){
@@ -27,7 +26,7 @@ public class BullySelector {
 
     public void startUp(){
         CenterServer primary = electing();
-        FrontEnd.getFrontEnd().setPrimaryServer(primary);
+        FrontEndImp.getFrontEnd().setPrimaryServer(primary);
     }
 
 }

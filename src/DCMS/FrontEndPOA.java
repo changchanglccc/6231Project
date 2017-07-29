@@ -37,7 +37,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
 
     switch (__method.intValue ())
     {
-       case 0:  // DCMS/FrontEnd/createTRecord
+       case 0:  // DCMS/FrontEndImp/createTRecord
        {
          String managerId = in.read_string ();
          String firstName = in.read_string ();
@@ -53,7 +53,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 1:  // DCMS/FrontEnd/createSRecord
+       case 1:  // DCMS/FrontEndImp/createSRecord
        {
          String managerId = in.read_string ();
          String firstName = in.read_string ();
@@ -68,7 +68,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 2:  // DCMS/FrontEnd/getRecordCounts
+       case 2:  // DCMS/FrontEndImp/getRecordCounts
        {
          String managerId = in.read_string ();
          String $result = null;
@@ -78,7 +78,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 3:  // DCMS/FrontEnd/editRecord
+       case 3:  // DCMS/FrontEndImp/editRecord
        {
          String managerId = in.read_string ();
          String recordID = in.read_string ();
@@ -91,7 +91,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 4:  // DCMS/FrontEnd/transferRecord
+       case 4:  // DCMS/FrontEndImp/transferRecord
        {
          String managerId = in.read_string ();
          String recordID = in.read_string ();
@@ -103,14 +103,14 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 5:  // DCMS/FrontEnd/shutdown
+       case 5:  // DCMS/FrontEndImp/shutdown
        {
          this.shutdown ();
          out = $rh.createReply();
          break;
        }
 
-       case 6:  // DCMS/FrontEnd/getRecordInfo
+       case 6:  // DCMS/FrontEndImp/getRecordInfo
        {
          String recordID = in.read_string ();
          String $result = null;
@@ -129,7 +129,7 @@ public abstract class FrontEndPOA extends org.omg.PortableServer.Servant
 
   // Type-specific CORBA::Object operations
   private static String[] __ids = {
-    "IDL:DCMS/FrontEnd:1.0"};
+    "IDL:DCMS/FrontEndImp:1.0"};
 
   public String[] _all_interfaces (org.omg.PortableServer.POA poa, byte[] objectId)
   {
