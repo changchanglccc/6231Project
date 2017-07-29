@@ -1,0 +1,19 @@
+module ClassManageSystem{
+
+    interface CenterServer{
+
+         boolean createTRecord(in string managerId, in string firstName, in string lastName, in string address, in string phone, in string specialization, in string location);
+
+         boolean createSRecord(in string managerId, in string firstName, in string lastName, in string coursesRegistered, in string status, in string date);
+
+         string  getRecordCounts(in string managerId);
+
+         boolean editRecord(in string managerId, in string recordID, in string fieldName, in string newValue);
+
+         boolean transferRecord(in string managerId, in string recordID, in string remoteCenterServerName);
+
+         oneway void shutdown();
+
+         string getRecordInfo(in string recordID);
+    };
+};
