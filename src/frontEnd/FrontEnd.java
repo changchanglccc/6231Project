@@ -1,13 +1,20 @@
 package frontEnd;
 
 
+import java.io.File;
+
+import org.omg.CORBA.ORB;
+
 import servers.CenterServer;
 
 public class FrontEnd {
 
     private static FrontEnd frontEnd;
     private CenterServer primaryServer;
-    private int portnum;
+    private int portNum;
+    public String centerName;
+    private File loggingFile;
+    private ORB orb;
 
     private FrontEnd(){}
 
@@ -19,8 +26,10 @@ public class FrontEnd {
     }
 
 
-    public void setPrimaryServer(CenterServer primary){
+    public void setPrimaryServer(CenterServer primary,File loggingFile,String centerName){
         this.primaryServer=primary;
+        this.loggingFile=loggingFile;
+        this.centerName=centerName;
     }
 
     //front end 跟 client 用corba交流，so,FE得有CORBA的idl,这个类去实现
