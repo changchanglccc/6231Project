@@ -10,7 +10,7 @@ package DCMS;
 
 abstract public class FrontEndHelper
 {
-  private static String  _id = "IDL:DCMS/FrontEnd:1.0";
+  private static String  _id = "IDL:DCMS/FrontEndImp:1.0";
 
   public static void insert (org.omg.CORBA.Any a, DCMS.FrontEnd that)
   {
@@ -30,7 +30,7 @@ abstract public class FrontEndHelper
   {
     if (__typeCode == null)
     {
-      __typeCode = org.omg.CORBA.ORB.init ().create_interface_tc (DCMS.FrontEndHelper.id (), "FrontEnd");
+      __typeCode = org.omg.CORBA.ORB.init ().create_interface_tc (DCMS.FrontEndHelper.id (), "FrontEndImp");
     }
     return __typeCode;
   }
