@@ -27,7 +27,7 @@ public class BullySelector {
 
     public void startUp(){
         CenterServer primary = electing();
-        //TODO:config
+        FrontEnd.getFrontEnd().setPrimaryServer(primary);
     }
 
 }
