@@ -16,6 +16,8 @@ public class FrontEndImp extends FrontEndPOA{
 
     private static FrontEndImp frontEnd;
     private CenterServer primaryServer;
+    private ORB orb;
+    private int portNum;
 
     private FrontEndImp(){}
     //singleton
@@ -40,6 +42,7 @@ public class FrontEndImp extends FrontEndPOA{
             rootpoa.the_POAManager().activate();
             // create servant and register it with the ORB
             FrontEndImp frontEndSurvant=FrontEndImp.getFrontEnd();
+            frontEndSurvant.setORB(orb);
             // get object reference from the servant
             org.omg.CORBA.Object ref = rootpoa.servant_to_reference(frontEndSurvant);
             FrontEnd href = FrontEndHelper.narrow(ref);
@@ -53,13 +56,17 @@ public class FrontEndImp extends FrontEndPOA{
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
             orb.run();
+            System.out.println("------");
         }
         catch (Exception e) {
             System.err.println("ERROR: " + e);
             e.printStackTrace(System.out);
         }
     }
-
+    
+    public void setORB(ORB orb_val){
+        orb = orb_val;
+    }
 
     public void setPrimaryServer(CenterServer primary){
         this.primaryServer=primary;
@@ -92,6 +99,7 @@ public class FrontEndImp extends FrontEndPOA{
 
     @Override
     public void shutdown() {
+    	this.orb.shutdown(false);
     }
 
     @Override
