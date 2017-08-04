@@ -13,12 +13,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-
-import jdk.nashorn.internal.ir.BreakableNode;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
-import sun.misc.Queue;
 import thread.UdpListener;
 
 public class Server1 implements CenterServer{
@@ -30,7 +27,8 @@ public class Server1 implements CenterServer{
     private File loggingFileMTL = new File("MTLServer1.txt");
     private File loggingFileLVL = new File("LVLServer1.txt");
     
-    public static void main(String[] args) {
+    @SuppressWarnings("null")
+	public static void main(String[] args) {
     	int port=5001;
     	String message = null;
     	Server1 server1 = null;
@@ -159,8 +157,23 @@ public class Server1 implements CenterServer{
 
 	@Override
 	public String getRecordCounts(String managerId) {
-		// TODO Auto-generated method stub
-		return null;
+		 String DDONum = String.valueOf(getLocalRecordsCount("DDO1111"));
+		 String LVLNum = String.valueOf(getLocalRecordsCount("LVL1111"));
+		 String MTLNum = String.valueOf(getLocalRecordsCount("MTL1111"));
+		 
+		//log
+        String log=(new Date().toString()+" - "+managerId+" - get records number ");
+        if(managerId.startsWith("MTL")){
+            writeLog(log,loggingFileMTL);
+		}
+		else if(managerId.startsWith("DDO")){
+	        writeLog(log,loggingFileDDO);
+		}
+		else{
+	        writeLog(log,loggingFileLVL);
+		}
+
+        return "Records Count: DDO:"+DDONum+" | LVL:"+LVLNum+" | MTL:"+MTLNum;
 	}
 
 
@@ -232,8 +245,95 @@ public class Server1 implements CenterServer{
 
 	@Override
 	public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
-		// TODO Auto-generated method stub
-		return false;
+		Record targetRecord=null;
+		Collection<ArrayList<Record>> arrayListsSet = null;
+		if(managerId.startsWith("MTL")){
+			arrayListsSet=MTLServer1.values();
+		}
+		else if(managerId.startsWith("DDO")){
+			 arrayListsSet=DDOServer1.values();
+		}
+		else{
+			 arrayListsSet=LVLServer1.values();
+		}
+		
+        for(ArrayList<Record> recordArrayListSet : arrayListsSet){
+            for(Record record:recordArrayListSet){
+                if(record.recordID.equalsIgnoreCase(recordID))
+                    targetRecord=record;
+                break;
+            }
+        }
+        if(targetRecord==null){
+            //log
+            String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
+            "Error:record not exist");
+            
+            if(managerId.startsWith("MTL")){
+                writeLog(log,loggingFileMTL);
+    		}
+    		else if(managerId.startsWith("DDO")){
+    	        writeLog(log,loggingFileDDO);
+    		}
+    		else{
+    	        writeLog(log,loggingFileLVL);
+    		}
+            return false;
+        }
+        else{
+            //remove
+        	ArrayList<Record> theArrayList = null; 
+        	if(managerId.startsWith("MTL")){
+        		theArrayList=MTLServer1.get(targetRecord.lastName.charAt(0));
+    		}
+    		else if(managerId.startsWith("DDO")){
+    			theArrayList=DDOServer1.get(targetRecord.lastName.charAt(0));
+    		}
+    		else{
+    			theArrayList=LVLServer1.get(targetRecord.lastName.charAt(0));
+    		}
+        	
+        	theArrayList.remove(targetRecord);
+            
+            //add
+            boolean flag = true;
+            if(remoteCenterServerName.startsWith("DDO"))
+            	storingRecord(targetRecord,DDOServer1);
+            else if(remoteCenterServerName.startsWith("LVL"))
+            	storingRecord(targetRecord,LVLServer1);
+            else if(remoteCenterServerName.startsWith("MTL"))
+            	storingRecord(targetRecord,MTLServer1);
+            else
+                flag=false;
+            //log
+            if(flag){
+                String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
+                        "Success");
+                if(managerId.startsWith("MTL")){
+                    writeLog(log,loggingFileMTL);
+        		}
+        		else if(managerId.startsWith("DDO")){
+        	        writeLog(log,loggingFileDDO);
+        		}
+        		else{
+        	        writeLog(log,loggingFileLVL);
+        		}
+            }
+            else{
+                String log=(new Date().toString()+" - "+managerId+" - transferring the record - "+recordID+" - "+
+                        "Fail");
+                if(managerId.startsWith("MTL")){
+                    writeLog(log,loggingFileMTL);
+        		}
+        		else if(managerId.startsWith("DDO")){
+        	        writeLog(log,loggingFileDDO);
+        		}
+        		else{
+        	        writeLog(log,loggingFileLVL);
+        		}
+            }
+            return flag;
+        }
 	}
 
 
