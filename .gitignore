@@ -7,6 +7,10 @@
 *.iml
 out
 gen
+
+# eclipse
 /bin/
 .DS_Store
 */.DS_Store
+.classpath
+.project
