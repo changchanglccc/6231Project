@@ -12,8 +12,6 @@ module DCMS{
 
          boolean transferRecord(in string managerId, in string recordID, in string remoteCenterServerName);
 
-         oneway void shutdown();
-
-         string getRecordInfo(in string recordID);
+         string getRecordInfo(in string managerId, in string recordID);
     };
 };

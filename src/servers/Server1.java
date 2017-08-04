@@ -23,7 +23,6 @@ public class Server1 {
     public static void main(String[] args) {
     	String message = null;
     	multicast(message);
-    	
 	}
     
     
