@@ -1,17 +1,16 @@
 package frontEnd;
 
-import servers.CenterServer;
 import java.util.ArrayList;
 
 
 public class BullySelector {
 
     private static BullySelector bullySelector;
-    private ArrayList<CenterServer> centerServerList;
+    private ArrayList<Integer> centerServerList;
 
 
     private BullySelector(){
-        centerServerList=new ArrayList<CenterServer>();
+        centerServerList=new ArrayList<Integer>();
     }
 
     public static BullySelector getBullySelector(){
@@ -20,13 +19,17 @@ public class BullySelector {
         return bullySelector;
     }
 
-    private CenterServer electing(){
-        return null;
+    private int electing(){
+        return 0;
     }
 
     public void startUp(){
-        CenterServer primary = electing();
-        FrontEndImp.getFrontEnd().setPrimaryServer(primary);
+        int primaryPortNo = electing();
+        FrontEndImp.getFrontEnd().setPrimaryServer(primaryPortNo);
+    }
+
+    public void addServer(int newServer){
+        centerServerList.add(newServer);
     }
 
 }
