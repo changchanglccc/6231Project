@@ -5,17 +5,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import DCMS.FrontEnd;
+import DCMS.FrontEndHelper;
+import org.omg.CosNaming.NamingContextExt;
+
 
 public class Manager{
-
 	private String managerID;
-	private static File loggingFile=new File("manager.txt");
+	private FrontEnd centerServerImp;
+	private static File loggingFile=new File("Manager.txt");
 
 
 	public Manager(String managerID){
 		this.managerID = managerID;
-
 	}
+
+	
 
 
 	public boolean createTRecord(String firstName, String lastName, String address, String phone, String specialization, String location){
