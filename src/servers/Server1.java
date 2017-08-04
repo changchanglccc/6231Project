@@ -31,7 +31,6 @@ public class Server1 implements CenterServer{
     	
     	String message = null;
     	multicast(message);
-    	
 	}
     
     
