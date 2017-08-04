@@ -6,11 +6,11 @@ import java.util.ArrayList;
 public class BullySelector {
 
     private static BullySelector bullySelector;
-    private ArrayList<Integer> centerServerList;
+    private ArrayList<Integer> serverList;
 
 
     private BullySelector(){
-        centerServerList=new ArrayList<Integer>();
+        serverList =new ArrayList<Integer>();
     }
 
     public static BullySelector getBullySelector(){
@@ -29,7 +29,7 @@ public class BullySelector {
     }
 
     public void addServer(int newServer){
-        centerServerList.add(newServer);
+        serverList.add(newServer);
     }
 
 }

@@ -38,7 +38,10 @@ public class FrontEndImp extends FrontEndPOA{
 
         //start up the periodical detecting
         FailureDetector failureDetector=new FailureDetector();
-        failureDetector.run();
+        failureDetector.addServer(5001);
+        failureDetector.addServer(5002);
+        failureDetector.addServer(5003);
+        failureDetector.startUp();
 
         //run CORBA and listen requests from clients
         try{
