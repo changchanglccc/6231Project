@@ -10,12 +10,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import DCMS.FrontEnd;
+import DCMS.FrontEndHelper;
+import org.omg.CosNaming.NamingContextExt;
+
 
 public class Manager{
-
 	private String managerID;
 	private FrontEnd frontEnd;
 	private static File loggingFile=new File("manager.txt");
+
 
 	public Manager(String managerID){
 		this.managerID = managerID;
