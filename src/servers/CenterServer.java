@@ -12,5 +12,5 @@ public interface CenterServer {
 
     boolean transferRecord(String managerId, String recordID, String remoteCenterServerName);
 
-    String getRecordInfo(String recordID);
+    String getRecordInfo(String managerId,String recordID);
 }
