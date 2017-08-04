@@ -123,7 +123,6 @@ public class Server1 implements CenterServer{
         //
         int afterNum=getLocalRecordsCount(managerId);
        
-
         return beforeNum+1<=afterNum;
 	}
 
