@@ -2,8 +2,6 @@ package client;
 
 import java.util.Scanner;
 
-
-
 public class ManagerClient {
 
 	public static void main(String[] args){

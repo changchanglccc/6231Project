@@ -98,12 +98,7 @@ public class FrontEndImp extends FrontEndPOA{
     }
 
     @Override
-    public void shutdown() {
-    	this.orb.shutdown(false);
-    }
-
-    @Override
-    public String getRecordInfo(String recordID) {
+    public String getRecordInfo(String manageID,String recordID) {
       return primaryServer.getRecordInfo(recordID);
     }
 
