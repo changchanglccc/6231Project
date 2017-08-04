@@ -7,3 +7,6 @@
 *.iml
 out
 gen
+/bin/
+.DS_Store
+*/.DS_Store
