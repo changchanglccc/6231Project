@@ -8,15 +8,16 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import records.Record;
 import sun.misc.Queue;
 
-public class Server3 {
+public class Server3 implements CenterServer{
 	private HashMap<Character,ArrayList<Record>> DDOServer3;
 	private HashMap<Character,ArrayList<Record>> MTLServer3;
 	private HashMap<Character,ArrayList<Record>> LVLServer3;
-	private Queue<String> queue;
+	private LinkedList<String> queue;
     private File loggingFile;
     private File loggingFileMTL;
     private File loggingFileLVL;
@@ -60,6 +61,56 @@ public class Server3 {
         	if(socket != null) 
         		socket.close();
         }
+	}
+
+
+
+	@Override
+	public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone,
+			String specialization, String location) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public boolean createSRecord(String managerId, String firstName, String lastName, String coursesRegistered,
+			String status, String date) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public String getRecordCounts(String managerId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public boolean editRecord(String managerId, String recordID, String fieldName, String newValue) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public String getRecordInfo(String recordID) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
