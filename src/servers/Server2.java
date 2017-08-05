@@ -90,8 +90,9 @@ public class Server2 implements CenterServer{
 		return false;
 	}
 
+
 	@Override
-	public String getRecordInfo(String recordID) {
+	public String getRecordInfo(String managerId, String recordID) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -17,6 +17,7 @@ import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
 import thread.UdpListener;
+import thread.UdpListener3;
 
 public class Server3 implements CenterServer{
 	private HashMap<Character,ArrayList<Record>> DDOServer3;
@@ -40,66 +41,21 @@ public class Server3 implements CenterServer{
     	boolean flag;
     	String replyMessage = null;
     	String message = "";
-    	Server3 server3 = null;
-    	UdpListener udpListener = new UdpListener(port);
-		udpListener.run();
-		
+    	Server3 server3 = new Server3();
+//    	UdpListener udpListener = new UdpListener(server3,port);
+//		udpListener.run();
+    	CommonServer commonServer = new CommonServer();
+    	new UdpListener3(commonServer,port,server3).start();
+    	
 		while(true){
 			// get message from the UdpListener
-			message = udpListener.getMessage();
-			System.out.println("message: "+message);
+			message = commonServer.getMessage();
+//			System.out.println("message: "+message);
 			
 			if(message.equals("")){// it is a backup 
 				multicast(message,server3);
 			}
-			else{ //become primary replica
-				String[] strings = message.split(",");
-		    	switch(strings[0]){
-		    		case "1":
-		    			flag = server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "2":
-		    			flag = server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "3":
-		    			replyMessage = server3.getRecordCounts(strings[1]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		case "4":
-		    			flag = server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "5":
-		    			flag = server3.transferRecord(strings[1], strings[2], strings[3]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "7":
-		    			replyMessage = server3.getRecordInfo(strings[1],strings[2]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		default:
-		    			System.out.println("error!");
-		    	}
-		    	message="";
-		    	
-		    	InetAddress host;
-				try {
-					host = InetAddress.getByName("localhost");
-					DatagramSocket datagramSocket = new DatagramSocket(port);
-					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, host, port);
-					datagramSocket.send(replyPacket);
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			
     	
 		}
     		
@@ -169,7 +125,7 @@ public class Server3 implements CenterServer{
         }
 	}
 
-	public static void multicast2(String message){// as a primary replica
+	public void multicast2(String message){// as a primary replica
 		//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
     	MulticastSocket socket = null;
