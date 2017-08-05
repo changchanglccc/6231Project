@@ -6,21 +6,21 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import servers.CommonServer;
-import servers.Server1;
+import servers.Server2;
 
-public class UdpListener extends Thread{
+public class UdpListener2 extends Thread{
 
     private String message;
     private int port;
     private CommonServer commonServer;
-    private Server1 server1;
+    private Server2 server2;
     private boolean flag;
 	private String replyMessage;
 
-    public UdpListener(CommonServer server, int portNumber,Server1 server1){
+    public UdpListener2(CommonServer server, int portNumber,Server2 server2){
         this.port=portNumber;
         this.commonServer = server;
-        this.server1 = server1;
+        this.server2 = server2;
         this.message = "";
         this.flag = false;
         this.replyMessage = "";
@@ -55,31 +55,31 @@ public class UdpListener extends Thread{
     		    	String[] strings = message.split(",");
     		    	switch(strings[0]){
     		    		case "1":
-    		    			flag = server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-    		    			server1.multicast(message);
+    		    			flag = server2.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+    		    			server2.multicast(message);
     		    			reply = String.valueOf(flag).getBytes();
     		    			break;
     		    		case "2":
-    		    			flag = server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
-    		    			server1.multicast(message);
+    		    			flag = server2.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+    		    			server2.multicast(message);
     		    			reply = String.valueOf(flag).getBytes();
     		    			break;
     		    		case "3":
-    		    			replyMessage = server1.getRecordCounts(strings[1]);
+    		    			replyMessage = server2.getRecordCounts(strings[1]);
     		    			reply = replyMessage.getBytes();
     		    			break;
     		    		case "4":
-    		    			flag = server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
-    		    			server1.multicast(message);
+    		    			flag = server2.editRecord(strings[1], strings[2], strings[3], strings[4]);
+    		    			server2.multicast(message);
     		    			reply = String.valueOf(flag).getBytes();
     		    			break;
     		    		case "5":
-    		    			flag = server1.transferRecord(strings[1], strings[2], strings[3]);
-    		    			server1.multicast(message);
+    		    			flag = server2.transferRecord(strings[1], strings[2], strings[3]);
+    		    			server2.multicast(message);
     		    			reply = String.valueOf(flag).getBytes();
     		    			break;
     		    		case "7":
-    		    			replyMessage = server1.getRecordInfo(strings[1],strings[2]);
+    		    			replyMessage = server2.getRecordInfo(strings[1],strings[2]);
     		    			reply = replyMessage.getBytes();
     		    			break;
     		    		default:
