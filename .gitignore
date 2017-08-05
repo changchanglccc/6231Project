@@ -14,3 +14,4 @@ gen
 */.DS_Store
 .classpath
 .project
+/src/orb.db/
