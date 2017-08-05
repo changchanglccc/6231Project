@@ -30,6 +30,7 @@ public class FrontEndImp extends FrontEndPOA{
     }
 
     public static void main(String[] args){
+        int frontEndPortNo=5000;
         //config
         BullySelector.getBullySelector().addServer(5001);
         BullySelector.getBullySelector().addServer(5002);
@@ -37,11 +38,11 @@ public class FrontEndImp extends FrontEndPOA{
         BullySelector.getBullySelector().startUp();
 
         //start up the periodical detecting
-        FailureDetector failureDetector=new FailureDetector();
+        FailureDetector failureDetector=new FailureDetector(frontEndPortNo);
         failureDetector.addServer(5001);
         failureDetector.addServer(5002);
         failureDetector.addServer(5003);
-        failureDetector.startUp();
+        failureDetector.start();
 
         //run CORBA and listen requests from clients
         try{
