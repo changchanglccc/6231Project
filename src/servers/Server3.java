@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -22,49 +22,117 @@ public class Server3 implements CenterServer{
 	private HashMap<Character,ArrayList<Record>> DDOServer3;
 	private HashMap<Character,ArrayList<Record>> MTLServer3;
 	private HashMap<Character,ArrayList<Record>> LVLServer3;
-	private LinkedList<String> queue;
 	private File loggingFileDDO = new File("DDOServer3.txt");
     private File loggingFileMTL = new File("MTLServer3.txt");
     private File loggingFileLVL = new File("LVLServer3.txt");
     
+    public Server3() {
+		this.DDOServer3 = new HashMap<>();
+		this.MTLServer3 = new HashMap<>();
+		this.LVLServer3 = new HashMap<>();
+	}
+    
+    
     @SuppressWarnings("null")
 	public static void main(String[] args) {
     	int port=5003;
-    	String message = null;
-    	Server1 server1 = null;
-		new UdpListener(message,port).start();
-		System.out.println("message: "+message);
-    	String[] strings = message.split(",");
+    	byte[] reply = new byte[1000];
+    	boolean flag;
+    	String replyMessage = null;
+    	String message = "";
+    	Server3 server3 = null;
+    	UdpListener udpListener = new UdpListener(port);
+		udpListener.run();
+		
+		while(true){
+			// get message from the UdpListener
+			message = udpListener.getMessage();
+			System.out.println("message: "+message);
+			
+			if(message.equals("")){// it is a backup 
+				multicast(message,server3);
+			}
+			else{ //become primary replica
+				String[] strings = message.split(",");
+		    	switch(strings[0]){
+		    		case "1":
+		    			flag = server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+		    			multicast2(message);
+		    			reply = String.valueOf(flag).getBytes();
+		    			break;
+		    		case "2":
+		    			flag = server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+		    			multicast2(message);
+		    			reply = String.valueOf(flag).getBytes();
+		    			break;
+		    		case "3":
+		    			replyMessage = server3.getRecordCounts(strings[1]);
+		    			reply = replyMessage.getBytes();
+		    			break;
+		    		case "4":
+		    			flag = server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
+		    			multicast2(message);
+		    			reply = String.valueOf(flag).getBytes();
+		    			break;
+		    		case "5":
+		    			flag = server3.transferRecord(strings[1], strings[2], strings[3]);
+		    			multicast2(message);
+		    			reply = String.valueOf(flag).getBytes();
+		    			break;
+		    		case "7":
+		    			replyMessage = server3.getRecordInfo(strings[1],strings[2]);
+		    			reply = replyMessage.getBytes();
+		    			break;
+		    		default:
+		    			System.out.println("error!");
+		    	}
+		    	message="";
+		    	
+		    	InetAddress host;
+				try {
+					host = InetAddress.getByName("localhost");
+					DatagramSocket datagramSocket = new DatagramSocket(port);
+					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, host, port);
+					datagramSocket.send(replyPacket);
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+    	
+		}
+    		
+    	
+    }
+    
+	public static void operation(String message,Server3 server3){
+		String[] strings = message.split(",");
     	switch(strings[0]){
     		case "1":
-    			server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+    			server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
     			break;
     		case "2":
-    			server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+    			server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
     			break;
     		case "3":
-    			server1.getRecordCounts(strings[1]);
+    			server3.getRecordCounts(strings[1]);
     			break;
     		case "4":
-    			server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
+    			server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
     			break;
     		case "5":
-    			server1.transferRecord(strings[1], strings[2], strings[3]);
+    			server3.transferRecord(strings[1], strings[2], strings[3]);
     			break;
     		case "7":
-    			server1.getRecordInfo(strings[1],strings[2]);
+    			server3.getRecordInfo(strings[1],strings[2]);
     			break;
     		default:
     			System.out.println("error!");
     	}
-    		
-    		
-    	multicast(message);
-    }
-    
-	
+	}
 
-	public static void multicast(String message){
+	public static void multicast(String message,Server3 server3){//as a backup
     	
     	//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
@@ -74,19 +142,21 @@ public class Server3 implements CenterServer{
         	InetAddress group = InetAddress.getByName("228.5.6.7");
         	socket = new MulticastSocket(6789);
         	socket.joinGroup(group);
-        	byte[] m = "Server3 nihao".getBytes();
+        	byte[] m = "Server3 finish".getBytes();
         	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
         	
         	byte[] buffer = new byte[1000];
-        	for(int i=0;i<=2;i++){ // get messages from others in group
-        		System.out.println("receiving");
+//        	for(int i=0;i<=2;i++){ // get messages from others in group
+        		System.out.println("receiving...");
         		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
         		socket.receive(messageIn);
         		System.out.println("Recieve:"+ new String(messageIn.getData()));
+        		
+        		operation(new String(messageIn.getData()), server3);
         		socket.send(messageOut);
-        	}
+//        	}
         	System.out.println("Server3");
-//        	socket.leaveGroup(group);
+        	socket.leaveGroup(group);
         }catch(SocketException e){
         	System.out.println("Socket: " + e.getMessage());
         	e.printStackTrace();
@@ -99,6 +169,37 @@ public class Server3 implements CenterServer{
         }
 	}
 
+	public static void multicast2(String message){// as a primary replica
+		//Multicast
+    	// args give message contents & destination multicast group (e.g. "228.5.6.7")
+    	MulticastSocket socket = null;
+        try{
+        	System.setProperty("java.net.preferIPv4Stack", "true");
+        	InetAddress group = InetAddress.getByName("228.5.6.7");
+        	socket = new MulticastSocket(6789);
+        	socket.joinGroup(group);
+        	byte[] m = "Server3 nihao".getBytes();
+        	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
+        	socket.send(messageOut);
+        	byte[] buffer = new byte[1000];
+        	for(int i=0;i<2;i++){  // get messages from others in group
+        		System.out.println("receiving");
+        		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
+        		socket.receive(messageIn);
+        		System.out.println("Recieve:"+ new String(messageIn.getData()));
+        	}
+        	System.out.println("Server3");
+        	socket.leaveGroup(group);
+        }catch(SocketException e){
+        	System.out.println("Socket: " + e.getMessage());
+        }catch (IOException e) {
+        	System.out.println("IO: " + e.getMessage());
+		}
+        finally {
+        	if(socket != null) 
+        		socket.close();
+		}
+	}
 
 
 	@Override

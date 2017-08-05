@@ -8,13 +8,18 @@ public class UdpListener extends Thread{
     private String message;
     private int port;
 
-    public UdpListener(String message,int portNumber){
-        this.message=message;
+    public UdpListener(int portNumber){
         this.port=portNumber;
+        this.message = "";
     }
 
 
-    @Override
+    public String getMessage() {
+		return message;
+	}
+
+
+	@Override
     public void run() {
         DatagramSocket datagramSocket = null;
         try {
@@ -24,6 +29,7 @@ public class UdpListener extends Thread{
 //            System.out.println(centerServerImp.centerName+"is ready to listen UDP requests between servers");
             //listening
             while(true){
+            	message="";
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(request);
                 message=new String(request.getData());
