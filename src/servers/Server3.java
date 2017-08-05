@@ -55,54 +55,7 @@ public class Server3 implements CenterServer{
 			if(message.equals("")){// it is a backup 
 				multicast(message,server3);
 			}
-			else{ //become primary replica
-				String[] strings = message.split(",");
-		    	switch(strings[0]){
-		    		case "1":
-		    			flag = server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "2":
-		    			flag = server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "3":
-		    			replyMessage = server3.getRecordCounts(strings[1]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		case "4":
-		    			flag = server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "5":
-		    			flag = server3.transferRecord(strings[1], strings[2], strings[3]);
-		    			multicast2(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "7":
-		    			replyMessage = server3.getRecordInfo(strings[1],strings[2]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		default:
-		    			System.out.println("error!");
-		    	}
-		    	message="";
-		    	
-		    	InetAddress host;
-				try {
-					host = InetAddress.getByName("localhost");
-					DatagramSocket datagramSocket = new DatagramSocket(port);
-					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, host, port);
-					datagramSocket.send(replyPacket);
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			
     	
 		}
     		
