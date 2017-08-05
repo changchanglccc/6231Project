@@ -57,12 +57,19 @@ public class UdpListener extends Thread{
     		    		case "1":
     		    			flag = server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
     		    			server1.multicast(message);
-    		    			reply = String.valueOf(flag).getBytes();
+//    		    			System.out.println("flag: "+String.valueOf(flag));
+    		    			if(flag)
+    		    				reply = "SUCCESS".getBytes();
+    		    			else 
+								reply = "FAIL".getBytes();
     		    			break;
     		    		case "2":
     		    			flag = server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
     		    			server1.multicast(message);
-    		    			reply = String.valueOf(flag).getBytes();
+    		    			if(flag)
+    		    				reply = "SUCCESS".getBytes();
+    		    			else 
+								reply = "FAIL".getBytes();
     		    			break;
     		    		case "3":
     		    			replyMessage = server1.getRecordCounts(strings[1]);
@@ -71,12 +78,18 @@ public class UdpListener extends Thread{
     		    		case "4":
     		    			flag = server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
     		    			server1.multicast(message);
-    		    			reply = String.valueOf(flag).getBytes();
+    		    			if(flag)
+    		    				reply = "SUCCESS".getBytes();
+    		    			else 
+								reply = "FAIL".getBytes();
     		    			break;
     		    		case "5":
     		    			flag = server1.transferRecord(strings[1], strings[2], strings[3]);
     		    			server1.multicast(message);
-    		    			reply = String.valueOf(flag).getBytes();
+    		    			if(flag)
+    		    				reply = "SUCCESS".getBytes();
+    		    			else 
+								reply = "FAIL".getBytes();
     		    			break;
     		    		case "7":
     		    			replyMessage = server1.getRecordInfo(strings[1],strings[2]);
@@ -88,6 +101,7 @@ public class UdpListener extends Thread{
 //    		    	message="";
     		    	
     				try {
+    					System.out.println("reply: "+String.valueOf(reply));
     					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, request.getAddress(), request.getPort());
     					datagramSocket.send(replyPacket);
     					
