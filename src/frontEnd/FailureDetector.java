@@ -9,6 +9,7 @@ public class FailureDetector extends Thread {
     private ArrayList<Integer> replicasList;
     private ArrayList<Integer> heartBeatRecords;
     private int port;
+    private int runsTolerant=2;
 
     public FailureDetector(int portNo){
         this.port=portNo;
@@ -18,7 +19,7 @@ public class FailureDetector extends Thread {
 
     public void addServer(int portNo){
         replicasList.add(portNo);
-        heartBeatRecords.add(2); //if continuous 2 times fail to receive.
+        heartBeatRecords.add(runsTolerant+1);
     }
 
     @Override
@@ -37,13 +38,13 @@ public class FailureDetector extends Thread {
                     String source=new String(heartBeat.getData());
                     recording(source);
                 }
-                if(heartBeatRecords.contains(0)){  //means 2 runs heartbeats
-                    if(!heartBeatRecords.contains(2)){
-                        for(int i=0;i<heartBeatRecords.size();i++){    //restore
-                            heartBeatRecords.set(i,2);
+                if(heartBeatRecords.contains(0)){
+                    if(!heartBeatRecords.contains(runsTolerant+1)){  //everyone is ok
+                        for(int i=0;i<heartBeatRecords.size();i++){
+                            heartBeatRecords.set(i,runsTolerant+1);
                         }
                     }else{
-                        int failReplica=heartBeatRecords.indexOf(2);   //someone fail
+                        int failReplica=heartBeatRecords.indexOf(runsTolerant+1);   //someone fail
                     }
                 }
             }
@@ -71,5 +72,5 @@ public class FailureDetector extends Thread {
         else
             System.out.println("FailureDetector: receive invalid heartBeat package");
     }
-    
+
 }

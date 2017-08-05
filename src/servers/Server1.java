@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -28,18 +27,17 @@ public class Server1 implements CenterServer{
     private File loggingFileLVL = new File("LVLServer1.txt");
     
     public Server1() {
-		DDOServer1 = new HashMap<>();
-		MTLServer1 = new HashMap<>();
-		LVLServer1 = new HashMap<>();
+		DDOServer1 = new HashMap<Character,ArrayList<Record>>();
+		MTLServer1 = new HashMap<Character,ArrayList<Record>>();
+		LVLServer1 = new HashMap<Character,ArrayList<Record>>();
 	}
-    
-    @SuppressWarnings("null")
+
 	public static void main(String[] args) {
     	int port=5001;
     	byte[] reply = new byte[1000];
     	boolean flag;
-    	String replyMessage = null;
-    	String message = "";
+    	String replyMessage ;
+    	String message ;
     	Server1 server1 = null;
     	UdpListener udpListener = new UdpListener(port);
 		udpListener.run();
