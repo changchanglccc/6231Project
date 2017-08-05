@@ -106,7 +106,7 @@ public class Server3 implements CenterServer{
         		System.out.println("receiving...");
         		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
         		socket.receive(messageIn);
-        		System.out.println("Recieve:"+ new String(messageIn.getData()));
+        		System.out.println("Recieve: "+ new String(messageIn.getData()));
         		
         		operation(new String(messageIn.getData()), server3);
         		socket.send(messageOut);

@@ -88,7 +88,8 @@ public class Server1 implements CenterServer  {
         	System.out.println("Server1");
         	socket.leaveGroup(group);
         }catch(SocketException e){
-        	System.out.println("Socket: " + e.getMessage());
+//        	System.out.println("Socket: " + e.getMessage());
+        	e.printStackTrace();
         }catch (IOException e) {
         	System.out.println("IO: " + e.getMessage());
 		}
