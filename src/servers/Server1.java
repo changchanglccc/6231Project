@@ -19,7 +19,7 @@ import records.StudentRecord;
 import records.TeacherRecord;
 import thread.UdpListener;
 
-public class Server1 implements CenterServer{
+public class Server1 implements CenterServer  {
 	private HashMap<Character,ArrayList<Record>> DDOServer1;
 	private HashMap<Character,ArrayList<Record>> MTLServer1;
 	private HashMap<Character,ArrayList<Record>> LVLServer1;
@@ -36,77 +36,37 @@ public class Server1 implements CenterServer{
     @SuppressWarnings("null")
 	public static void main(String[] args) {
     	int port=5001;
-    	byte[] reply = new byte[1000];
-    	boolean flag;
-    	String replyMessage = null;
+    	
+    	
     	String message = "";
-    	Server1 server1 = null;
-    	UdpListener udpListener = new UdpListener(port);
-		udpListener.run();
-		while(true){
-			message = udpListener.getMessage();
-//			System.out.println("message: "+message);
-			
-//			if(message.equals("")){// it is a backup 
-//				multicast(message);
-//			}
-//			else{ //become primary replica
-			if(!message.equals("")){
-		    	String[] strings = message.split(",");
-		    	switch(strings[0]){
-		    		case "1":
-		    			flag = server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-		    			multicast(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "2":
-		    			flag = server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
-		    			multicast(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "3":
-		    			replyMessage = server1.getRecordCounts(strings[1]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		case "4":
-		    			flag = server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
-		    			multicast(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "5":
-		    			flag = server1.transferRecord(strings[1], strings[2], strings[3]);
-		    			multicast(message);
-		    			reply = String.valueOf(flag).getBytes();
-		    			break;
-		    		case "7":
-		    			replyMessage = server1.getRecordInfo(strings[1],strings[2]);
-		    			reply = replyMessage.getBytes();
-		    			break;
-		    		default:
-		    			System.out.println("error!");
-		    	}
-		    	message="";
-		    	
-		    	
-		    	InetAddress host;
-				try {
-					host = InetAddress.getByName("localhost");
-					DatagramSocket datagramSocket = new DatagramSocket(port);
-					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, host, port);
-					datagramSocket.send(replyPacket);
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			
-		}
+    	Server1 server1 = new Server1();
+//    	UdpListener udpListener = new UdpListener(port);
+//		udpListener.run();
+    	CommonServer commonServer = new CommonServer();
+    	new UdpListener(commonServer,port,server1).start();
+    	
+//		while(true){
+//			message = commonServer.getMessage();
+////			System.out.println(message);
+//			
+//			if(!message.equals(""))
+//				System.out.println("message: "+message);
+//			else
+//				System.out.println("----");
+//			
+////			if(message.equals("")){// it is a backup 
+////				multicast(message);
+////			}
+////			else{ //become primary replica
+//			
+//			
+//			
+//		}
     	
 	}
     
     
-    public static void multicast(String message){
+    public void multicast(String message){
     	//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
     	MulticastSocket socket = null;
@@ -119,7 +79,7 @@ public class Server1 implements CenterServer{
         	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
         	socket.send(messageOut);
         	byte[] buffer = new byte[1000];
-        	for(int i=0;i<3;i++){  // get messages from others in group
+        	for(int i=0;i<2;i++){  // get messages from others in group
 //        		System.out.println("receiving...");
         		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
         		socket.receive(messageIn);
