@@ -99,6 +99,7 @@ public class UdpListener extends Thread{
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            System.out.println("-------");
         }finally {
             if(datagramSocket != null)
                 datagramSocket.close();
