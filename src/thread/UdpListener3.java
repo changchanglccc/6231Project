@@ -3,23 +3,18 @@ package thread;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-
-import servers.CommonServer;
 import servers.Server3;
 
 public class UdpListener3 extends Thread{
 
     private String message;
     private int port;
-    private CommonServer commonServer;
     private Server3 server3;
     private boolean flag;
 	private String replyMessage;
 
-    public UdpListener3(CommonServer server, int portNumber,Server3 server3){
+    public UdpListener3(int portNumber,Server3 server3){
         this.port=portNumber;
-        this.commonServer = server;
         this.server3 = server3;
         this.message = "";
         this.flag = false;
@@ -43,12 +38,13 @@ public class UdpListener3 extends Thread{
 //            System.out.println(centerServerImp.centerName+"is ready to listen UDP requests between servers");
             //listening
             while(true){
-//            	message="";
+            	message="";
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(request);
                 message=new String(request.getData());
                 System.out.println("updListener: "+getMessage());
-                commonServer.setMessage(message);
+//                commonServer.setMessage(message);
+                server3.setMessage(message);
 
                 
                 if(!message.equals("")){
@@ -90,6 +86,8 @@ public class UdpListener3 extends Thread{
     				try {
     					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, request.getAddress(), request.getPort());
     					datagramSocket.send(replyPacket);
+    					buffer = new byte[1000];// clear buffer, avoid the buffer last time influences the receiving buffer 
+    					reply = new byte[1000];
     					
     				} catch (IOException e) {
     					// TODO Auto-generated catch block
