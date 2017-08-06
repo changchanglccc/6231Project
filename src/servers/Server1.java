@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
@@ -25,130 +24,73 @@ public class Server1 implements CenterServer  {
     private File loggingFileDDO = new File("DDOServer1.txt");
     private File loggingFileMTL = new File("MTLServer1.txt");
     private File loggingFileLVL = new File("LVLServer1.txt");
-   
+    private String message;
     
     public Server1() {
-		DDOServer1 = new HashMap<Character,ArrayList<Record>>();
-		MTLServer1 = new HashMap<Character,ArrayList<Record>>();
-		LVLServer1 = new HashMap<Character,ArrayList<Record>>();
+		DDOServer1 = new HashMap<>();
+		MTLServer1 = new HashMap<>();
+		LVLServer1 = new HashMap<>();
+		this.message = "";
+
+	}
+    
+    public String getMessage() {
+		return message;
 	}
 
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+    
 	public static void main(String[] args) {
     	int port=5001;
+//    	byte[] reply = new byte[1000];
+//    	boolean flag;
+//    	String replyMessage = null;
+    	
     	Server1 server1 = new Server1();
-    	String message = "";
-    	boolean flag = false;
-    	String replyMessage = "";
+    	new UdpListener(port,server1).start();
     	
-//    	new UdpListener(port,server1).start();
+		while(true){
+			// get message from the UdpListener
+			if(server1.getMessage().equals("")){// it is a backup 
+				multicast(server1.getMessage(),server1);
+			}
     	
-//		while(true){
-//			message = commonServer.getMessage();
-////			System.out.println(message);
-//			
-//			if(!message.equals(""))
-//				System.out.println("message: "+message);
-//			else
-//				System.out.println("----");
-//			
-////			if(message.equals("")){// it is a backup 
-////				multicast(message);
-////			}
-////			else{ //become primary replica
-//			
-//			
-//			
-//		}
-    	
-    	 DatagramSocket datagramSocket = null;
-         try {
-             //create belonging socket
-             datagramSocket = new DatagramSocket(port);
-             byte[] buffer = new byte[1000];
-             byte[] reply = new byte[1000];
-//             System.out.println(centerServerImp.centerName+"is ready to listen UDP requests between servers");
-             //listening
-             while(true){
-             	 message="";
-             	
-                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-                 datagramSocket.receive(request);
-                 message=new String(request.getData()).trim();
-                 System.out.println("updListener: "+ message);
-                 
-                 if(!message.equals("")){
-     		    	String[] strings = message.split(",");
-     		    	switch(strings[0]){
-     		    		case "1":
-     		    			flag = server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
-     		    			server1.multicast(message);
-//     		    			System.out.println("flag: "+String.valueOf(flag));
-     		    			if(flag)
-     		    				reply = "SUCCESS".getBytes();
-     		    			else 
- 								reply = "FAIL".getBytes();
-     		    			break;
-     		    		case "2":
-     		    			flag = server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
-     		    			server1.multicast(message);
-     		    			if(flag)
-     		    				reply = "SUCCESS".getBytes();
-     		    			else 
- 								reply = "FAIL".getBytes();
-     		    			break;
-     		    		case "3":
-     		    			replyMessage = server1.getRecordCounts(strings[1]);
-     		    			reply = replyMessage.getBytes();
-     		    			break;
-     		    		case "4":
-     		    			flag = server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
-     		    			server1.multicast(message);
-     		    			if(flag)
-     		    				reply = "SUCCESS".getBytes();
-     		    			else 
- 								reply = "FAIL".getBytes();
-     		    			break;
-     		    		case "5":
-     		    			flag = server1.transferRecord(strings[1], strings[2], strings[3]);
-     		    			server1.multicast(message);
-     		    			if(flag)
-     		    				reply = "SUCCESS".getBytes();
-     		    			else 
- 								reply = "FAIL".getBytes();
-     		    			break;
-     		    		case "7":
-     		    			replyMessage = server1.getRecordInfo(strings[1],strings[2]);
-     		    			reply = replyMessage.getBytes();
-     		    			break;
-     		    		default:
-     		    			System.out.println("error!");
-     		    	}
-//     		    	message="";
-     		    	
-     				try {
-     					System.out.println("reply: "+String.valueOf(reply));
-     					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, request.getAddress(), request.getPort());
-     					datagramSocket.send(replyPacket);
-     					buffer = new byte[1000];
-     					reply = new byte[1000];
-     					
-     				} catch (IOException e) {
-     					// TODO Auto-generated catch block
-     					e.printStackTrace();
-     				}
-                 }
-             }
-         } catch (Exception e) {
-             System.out.println(e.getMessage());
-         }finally {
-             if(datagramSocket != null)
-                 datagramSocket.close();
-         }
-    	
+		}
+		
 	}
     
     
-    public void multicast(String message){
+    public static void operation(String message,Server1 server1){
+		String[] strings = message.split(",");
+    	switch(strings[0]){
+    		case "1":
+    			server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+    			break;
+    		case "2":
+    			server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+    			break;
+    		case "3":
+    			server1.getRecordCounts(strings[1]);
+    			break;
+    		case "4":
+    			server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
+    			break;
+    		case "5":
+    			server1.transferRecord(strings[1], strings[2], strings[3]);
+    			break;
+    		case "7":
+    			server1.getRecordInfo(strings[1],strings[2]);
+    			break;
+    		default:
+    			System.out.println("error!");
+    	}
+	}
+
+	public static void multicast(String message,Server1 server1){//as a backup
+    	
     	//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
     	MulticastSocket socket = null;
@@ -157,20 +99,23 @@ public class Server1 implements CenterServer  {
         	InetAddress group = InetAddress.getByName("228.5.6.7");
         	socket = new MulticastSocket(6789);
         	socket.joinGroup(group);
-        	byte[] m = message.getBytes();
+        	byte[] m = "Server1 finish".getBytes();
         	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
-        	socket.send(messageOut);
+        	
         	byte[] buffer = new byte[1000];
-        	for(int i=0;i<2;i++){  // get messages from others in group
-//        		System.out.println("receiving...");
+//        	for(int i=0;i<=2;i++){ // get messages from others in group
+        		System.out.println("receiving...");
         		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
         		socket.receive(messageIn);
-        		System.out.println("Recieve:"+ new String(messageIn.getData()));
-        	}
+        		System.out.println("Recieve: "+ new String(messageIn.getData()));
+        		
+        		operation(new String(messageIn.getData()), server1);
+        		socket.send(messageOut);
+//        	}
         	System.out.println("Server1");
         	socket.leaveGroup(group);
         }catch(SocketException e){
-//        	System.out.println("Socket: " + e.getMessage());
+        	System.out.println("Socket: " + e.getMessage());
         	e.printStackTrace();
         }catch (IOException e) {
         	System.out.println("IO: " + e.getMessage());
@@ -178,8 +123,40 @@ public class Server1 implements CenterServer  {
         finally {
         	if(socket != null) 
         		socket.close();
+        }
+	}
+
+	public void multicast2(String message){// as a primary replica
+		//Multicast
+    	// args give message contents & destination multicast group (e.g. "228.5.6.7")
+    	MulticastSocket socket = null;
+        try{
+        	System.setProperty("java.net.preferIPv4Stack", "true");
+        	InetAddress group = InetAddress.getByName("228.5.6.7");
+        	socket = new MulticastSocket(6789);
+        	socket.joinGroup(group);
+        	byte[] m = "Server1 nihao".getBytes();
+        	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
+        	socket.send(messageOut);
+        	byte[] buffer = new byte[1000];
+        	for(int i=0;i<2;i++){  // get messages from others in group
+        		System.out.println("receiving");
+        		DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
+        		socket.receive(messageIn);
+        		System.out.println("Recieve:"+ new String(messageIn.getData()));
+        	}
+        	System.out.println("Server1");
+        	socket.leaveGroup(group);
+        }catch(SocketException e){
+        	System.out.println("Socket: " + e.getMessage());
+        }catch (IOException e) {
+        	System.out.println("IO: " + e.getMessage());
 		}
-    }
+        finally {
+        	if(socket != null) 
+        		socket.close();
+		}
+	}
 
 
 	@Override

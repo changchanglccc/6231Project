@@ -76,7 +76,7 @@ public class FrontEndImp extends FrontEndPOA{
 
 
     public void setPrimaryServer(int primaryPortNo){
-        this.primaryPortNo=5001;
+        this.primaryPortNo=primaryPortNo;
     }
 
     @Override
