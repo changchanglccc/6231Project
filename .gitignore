@@ -12,3 +12,5 @@ gen
 /bin/
 .DS_Store
 */.DS_Store
+/src/orb.db/
+
