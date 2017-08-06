@@ -52,18 +52,20 @@ public class Server1 implements CenterServer  {
     	Server1 server1 = new Server1();
     	new UdpListener(port,server1).start();
     	
-		while(true){
+		while(true){ // as a primary
 			// get message from the UdpListener
+			//TODO: if PM crash, set message to something except ""
 			if(server1.getMessage().equals("")){// it is a backup 
-				multicast(server1.getMessage(),server1);
+				server1.multicast(server1.getMessage(),server1);
 			}
+//			server1.setMessage("");
     	
 		}
 		
 	}
     
     
-    public static void operation(String message,Server1 server1){
+    public void operation(String message,Server1 server1){
 		String[] strings = message.split(",");
     	switch(strings[0]){
     		case "1":
@@ -89,7 +91,7 @@ public class Server1 implements CenterServer  {
     	}
 	}
 
-	public static void multicast(String message,Server1 server1){//as a backup
+	public void multicast(String message,Server1 server1){//as a backup
     	
     	//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
@@ -135,7 +137,7 @@ public class Server1 implements CenterServer  {
         	InetAddress group = InetAddress.getByName("228.5.6.7");
         	socket = new MulticastSocket(6789);
         	socket.joinGroup(group);
-        	byte[] m = "Server1 nihao".getBytes();
+        	byte[] m = "Server1 finish".getBytes();
         	DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
         	socket.send(messageOut);
         	byte[] buffer = new byte[1000];
