@@ -20,7 +20,6 @@ public class Manager{
 	private FrontEnd frontEnd;
 	private static File loggingFile=new File("Manager.txt");
 
-
 	public Manager(String managerID){
 		this.managerID = managerID;
 		try{
