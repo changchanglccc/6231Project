@@ -3,7 +3,6 @@ package fifo;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,34 +12,59 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FifoUdpListener extends Thread {
 
     private static Lock lock;
-    public static int PORT_NUMBER;
-    public static DatagramSocket server = null;
+
+    private static int LISTEN_PORT_NUMBER;
+    private static int SEND_PORT_NUMBER;
+
+    private static boolean sendPortNbrChanged = false;
+
+    public static DatagramSocket server_receive = null;
+    public static DatagramSocket server_send = null;
+
     public static byte[] recvBuf = null;
     public static Queue<String> queue = null;
     public static Queue<Thread> threadList = null;
     public static TimerTaskRun timerTaskRun = null;
 
-    public FifoUdpListener(int portNbr) {
+    public FifoUdpListener(int listenPortNbr, int sendPortNbr) {
         lock = new ReentrantLock();
-        PORT_NUMBER = portNbr;
+
+        LISTEN_PORT_NUMBER = listenPortNbr;
+        SEND_PORT_NUMBER = sendPortNbr;
+
         try {
-            server = new DatagramSocket(PORT_NUMBER);
+            server_receive = new DatagramSocket(LISTEN_PORT_NUMBER);
+            server_send = new DatagramSocket(SEND_PORT_NUMBER);
         } catch (SocketException se) {
             System.err.println(se);
         }
+
         recvBuf = new byte[100];
         queue = new LinkedBlockingQueue<String>();
         threadList = new LinkedBlockingQueue<Thread>();
     }
 
+    public static void setNewSendPortNumber(int newSendPortNbr) {
+        SEND_PORT_NUMBER = newSendPortNbr;
+        sendPortNbrChanged = true;
+    }
+
     @Override
     public void run() {
+
+        if (sendPortNbrChanged) {
+            try {
+                server_send = new DatagramSocket(SEND_PORT_NUMBER);
+            } catch (SocketException se) {
+                System.err.println(se);
+            }
+        }
 
         while (true) {
             final DatagramPacket recvPacket
                     = new DatagramPacket(recvBuf, recvBuf.length);
             try {
-                server.receive(recvPacket);
+                server_receive.receive(recvPacket);
             } catch (IOException ie) {
                 System.err.println(ie);
             }
@@ -67,7 +91,7 @@ public class FifoUdpListener extends Thread {
                         // get the next message
                         final String head = queue.peek();
 
-                        timerTaskRun = new TimerTaskRun(server, head, recvPacket);
+                        timerTaskRun = new TimerTaskRun(server_send, head, recvPacket);
                         Thread thread = new Thread(timerTaskRun);
                         threadList.add(thread);
                         thread.start();
@@ -81,7 +105,7 @@ public class FifoUdpListener extends Thread {
                     lock.unlock();
                     // if the queue was empty, we send the task straight
                     final String head = queue.peek();
-                    timerTaskRun = new TimerTaskRun(server, head, recvPacket);
+                    timerTaskRun = new TimerTaskRun(server_send, head, recvPacket);
                     Thread thread = new Thread(timerTaskRun);
                     threadList.add(thread);
                     thread.start();

@@ -21,7 +21,9 @@ import fifo.FifoUdpListener;
 public class FrontEndImp extends FrontEndPOA {
 
     private static FrontEndImp frontEnd;
-    private int primaryPortNo;
+    public static int FIFO_LISTEN_PORT_NBR = 4999;
+    public static int PRIMARY_PORT_NBR = 5001;
+    public static int msgId = 10000;
 
     private FrontEndImp() {
     }
@@ -35,6 +37,7 @@ public class FrontEndImp extends FrontEndPOA {
 
     public static void main(String[] args) {
         int frontEndPortNo = 5000;
+
         //config
         BullySelector.getBullySelector().addServer(5001);
         BullySelector.getBullySelector().addServer(5002);
@@ -70,7 +73,7 @@ public class FrontEndImp extends FrontEndPOA {
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
 
-            FifoUdpListener fifo = new FifoUdpListener(frontEndPortNo);
+            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, PRIMARY_PORT_NBR);
             fifo.run();
 
             orb.run();
@@ -83,14 +86,19 @@ public class FrontEndImp extends FrontEndPOA {
 
 
     public void setPrimaryServer(int primaryPortNo) {
-        this.primaryPortNo = primaryPortNo;
+        this.PRIMARY_PORT_NBR = primaryPortNo;
+    }
+
+    public synchronized int getMsgIdAndIncre() {
+        msgId++;
+        return msgId - 1;
     }
 
     @Override
     public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone, String specialization, String location) {
         boolean flag = false;
-        String messageString = "1," + managerId + "," + firstName + "," + lastName + "," + address + "," + phone + "," + specialization + "," + location;
-        String reply = sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",1," + managerId + "," + firstName + "," + lastName + "," + address + "," + phone + "," + specialization + "," + location;
+        String reply = sendMsg2Fifo(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -100,8 +108,8 @@ public class FrontEndImp extends FrontEndPOA {
     @Override
     public boolean createSRecord(String managerId, String firstName, String lastName, String coursesRegistered, String status, String date) {
         boolean flag = false;
-        String messageString = "2," + managerId + "," + firstName + "," + lastName + "," + coursesRegistered + "," + status + "," + date;
-        String reply = sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",2," + managerId + "," + firstName + "," + lastName + "," + coursesRegistered + "," + status + "," + date;
+        String reply = sendMsg2Fifo(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -110,15 +118,15 @@ public class FrontEndImp extends FrontEndPOA {
 
     @Override
     public String getRecordCounts(String managerId) {
-        String messageString = "3," + managerId;
-        return sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",3," + managerId;
+        return sendMsg2Fifo(messageString);
     }
 
     @Override
     public boolean editRecord(String managerId, String recordID, String fieldName, String newValue) {
         boolean flag = false;
-        String messageString = "4," + managerId + "," + recordID + "," + fieldName + "," + newValue;
-        String reply = sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",4," + managerId + "," + recordID + "," + fieldName + "," + newValue;
+        String reply = sendMsg2Fifo(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -128,8 +136,8 @@ public class FrontEndImp extends FrontEndPOA {
     @Override
     public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
         boolean flag = false;
-        String messageString = "5," + managerId + "," + recordID + "," + remoteCenterServerName;
-        String reply = sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",5," + managerId + "," + recordID + "," + remoteCenterServerName;
+        String reply = sendMsg2Fifo(messageString);
         if (reply.equals("SUCCESS")) {
             flag = true;
         }
@@ -138,12 +146,12 @@ public class FrontEndImp extends FrontEndPOA {
 
     @Override
     public String getRecordInfo(String manageID, String recordID) {
-        String messageString = "7," + manageID + "," + recordID;
-        return sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",7," + manageID + "," + recordID;
+        return sendMsg2Fifo(messageString);
     }
 
 
-    private String sentMessage(String messageString) {
+    private String sendMsg2Fifo(String messageString) {
         DatagramSocket datagramSocket = null;
         String replyString = null;
 
@@ -152,7 +160,7 @@ public class FrontEndImp extends FrontEndPOA {
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
-            DatagramPacket request = new DatagramPacket(message, message.length, host, primaryPortNo);
+            DatagramPacket request = new DatagramPacket(message, message.length, host, FIFO_LISTEN_PORT_NBR);
             datagramSocket.send(request);
 
             //get message
