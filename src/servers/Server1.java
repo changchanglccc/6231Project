@@ -31,6 +31,7 @@ public class Server1 implements CenterServer  {
 		MTLServer1 = new HashMap<>();
 		LVLServer1 = new HashMap<>();
 		this.message = "";
+
 	}
     
     public String getMessage() {
