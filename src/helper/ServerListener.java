@@ -1,5 +1,5 @@
+package helper;
 
-package Helper;
 /**
  * Created by chongli on 2017-08-05.
  */

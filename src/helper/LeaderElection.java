@@ -1,4 +1,4 @@
-package Helper;
+package helper;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
