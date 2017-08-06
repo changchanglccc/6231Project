@@ -22,7 +22,7 @@ public class FrontEndImp extends FrontEndPOA {
 
     private static FrontEndImp frontEnd;
     public static int FIFO_LISTEN_PORT_NBR = 4999;
-    public static int PRIMARY_PORT_NBR = 5001;
+    public static int primary_port_nbr = 5001;
     public static int msgId = 10000;
 
     private FrontEndImp() {
@@ -73,7 +73,7 @@ public class FrontEndImp extends FrontEndPOA {
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
 
-            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, PRIMARY_PORT_NBR);
+            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, primary_port_nbr);
             fifo.run();
 
             orb.run();
@@ -86,7 +86,7 @@ public class FrontEndImp extends FrontEndPOA {
 
 
     public void setPrimaryServer(int primaryPortNo) {
-        this.PRIMARY_PORT_NBR = primaryPortNo;
+        this.primary_port_nbr = primaryPortNo;
     }
 
     public synchronized int getMsgIdAndIncre() {

@@ -14,7 +14,7 @@ public class FifoUdpListener extends Thread {
     private static Lock lock;
 
     private static int LISTEN_PORT_NUMBER;
-    private static int SEND_PORT_NUMBER;
+    private static int send_port_number;
 
     private static boolean sendPortNbrChanged = false;
 
@@ -30,11 +30,11 @@ public class FifoUdpListener extends Thread {
         lock = new ReentrantLock();
 
         LISTEN_PORT_NUMBER = listenPortNbr;
-        SEND_PORT_NUMBER = sendPortNbr;
+        send_port_number = sendPortNbr;
 
         try {
             server_receive = new DatagramSocket(LISTEN_PORT_NUMBER);
-            server_send = new DatagramSocket(SEND_PORT_NUMBER);
+            server_send = new DatagramSocket(send_port_number);
         } catch (SocketException se) {
             System.err.println(se);
         }
@@ -45,7 +45,7 @@ public class FifoUdpListener extends Thread {
     }
 
     public static void setNewSendPortNumber(int newSendPortNbr) {
-        SEND_PORT_NUMBER = newSendPortNbr;
+        send_port_number = newSendPortNbr;
         sendPortNbrChanged = true;
     }
 
@@ -55,7 +55,7 @@ public class FifoUdpListener extends Thread {
         while (true) {
             if (sendPortNbrChanged) {
                 try {
-                    server_send = new DatagramSocket(SEND_PORT_NUMBER);
+                    server_send = new DatagramSocket(send_port_number);
                 } catch (SocketException se) {
                     System.err.println(se);
                 }
