@@ -34,6 +34,7 @@ public class Server1 implements CenterServer  {
 
 	public static void main(String[] args) {
     	int port=5001;
+
     	
     	String message = "";
     	Server1 server1 = new Server1();
