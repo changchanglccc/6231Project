@@ -52,7 +52,6 @@ public class UdpServer {
                         threadList.add(thread);
                         thread.start();
                     }
-                } else {
                 }
             } else {
                 // if it's a task message
