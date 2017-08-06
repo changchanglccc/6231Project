@@ -267,6 +267,7 @@ public class Server2 implements CenterServer {
         }
     }
 
+
     public int getLocalRecordsCount(){
         int count=0;
         Collection<ArrayList<Record>> arrayListsSet=records.values();
