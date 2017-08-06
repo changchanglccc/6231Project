@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
-import thread.UdpListener;
 import thread.UdpListener3;
 
 public class Server3 implements CenterServer{
@@ -26,34 +24,44 @@ public class Server3 implements CenterServer{
 	private File loggingFileDDO = new File("DDOServer3.txt");
     private File loggingFileMTL = new File("MTLServer3.txt");
     private File loggingFileLVL = new File("LVLServer3.txt");
-    
-    public Server3() {
+    private String message;
+ 
+
+
+	public Server3() {
 		this.DDOServer3 = new HashMap<>();
 		this.MTLServer3 = new HashMap<>();
 		this.LVLServer3 = new HashMap<>();
+		this.message = "";
+	}
+	   
+    public String getMessage() {
+		return message;
+	}
+
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
     
-    
-    @SuppressWarnings("null")
 	public static void main(String[] args) {
     	int port=5003;
-    	byte[] reply = new byte[1000];
-    	boolean flag;
-    	String replyMessage = null;
-    	String message = "";
+//    	byte[] reply = new byte[1000];
+//    	boolean flag;
+//    	String replyMessage = null;
+    	
     	Server3 server3 = new Server3();
 //    	UdpListener udpListener = new UdpListener(server3,port);
 //		udpListener.run();
-    	CommonServer commonServer = new CommonServer();
-    	new UdpListener3(commonServer,port,server3).start();
+    	new UdpListener3(port,server3).start();
     	
 		while(true){
 			// get message from the UdpListener
-			message = commonServer.getMessage();
+//			message = commonServer.getMessage();
 //			System.out.println("message: "+message);
 			
-			if(message.equals("")){// it is a backup 
-				multicast(message,server3);
+			if(server3.getMessage().equals("")){// it is a backup 
+				multicast(server3.getMessage(),server3);
 			}
 			
     	
@@ -94,7 +102,7 @@ public class Server3 implements CenterServer{
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
     	MulticastSocket socket = null;
         try{
-        	System.setProperty("java.net.preferIPv4Stack", "true");
+//        	System.setProperty("java.net.preferIPv4Stack", "true");
         	InetAddress group = InetAddress.getByName("228.5.6.7");
         	socket = new MulticastSocket(6789);
         	socket.joinGroup(group);

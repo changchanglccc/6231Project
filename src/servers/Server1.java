@@ -26,6 +26,7 @@ public class Server1 implements CenterServer  {
     private File loggingFileDDO = new File("DDOServer1.txt");
     private File loggingFileMTL = new File("MTLServer1.txt");
     private File loggingFileLVL = new File("LVLServer1.txt");
+   
     
     public Server1() {
 		DDOServer1 = new HashMap<>();
@@ -36,14 +37,12 @@ public class Server1 implements CenterServer  {
     @SuppressWarnings("null")
 	public static void main(String[] args) {
     	int port=5001;
-    	
-    	
-    	String message = "";
     	Server1 server1 = new Server1();
-//    	UdpListener udpListener = new UdpListener(port);
-//		udpListener.run();
-    	CommonServer commonServer = new CommonServer();
-    	new UdpListener(commonServer,port,server1).start();
+    	String message = "";
+    	boolean flag = false;
+    	String replyMessage = "";
+    	
+//    	new UdpListener(port,server1).start();
     	
 //		while(true){
 //			message = commonServer.getMessage();
@@ -63,6 +62,91 @@ public class Server1 implements CenterServer  {
 //			
 //		}
     	
+    	 DatagramSocket datagramSocket = null;
+         try {
+             //create belonging socket
+             datagramSocket = new DatagramSocket(port);
+             byte[] buffer = new byte[1000];
+             byte[] reply = new byte[1000];
+//             System.out.println(centerServerImp.centerName+"is ready to listen UDP requests between servers");
+             //listening
+             while(true){
+             	 message="";
+             	
+                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                 datagramSocket.receive(request);
+                 message=new String(request.getData()).trim();
+                 System.out.println("updListener: "+ message);
+                 
+                 if(!message.equals("")){
+     		    	String[] strings = message.split(",");
+     		    	switch(strings[0]){
+     		    		case "1":
+     		    			flag = server1.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+     		    			server1.multicast(message);
+//     		    			System.out.println("flag: "+String.valueOf(flag));
+     		    			if(flag)
+     		    				reply = "SUCCESS".getBytes();
+     		    			else 
+ 								reply = "FAIL".getBytes();
+     		    			break;
+     		    		case "2":
+     		    			flag = server1.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+     		    			server1.multicast(message);
+     		    			if(flag)
+     		    				reply = "SUCCESS".getBytes();
+     		    			else 
+ 								reply = "FAIL".getBytes();
+     		    			break;
+     		    		case "3":
+     		    			replyMessage = server1.getRecordCounts(strings[1]);
+     		    			reply = replyMessage.getBytes();
+     		    			break;
+     		    		case "4":
+     		    			flag = server1.editRecord(strings[1], strings[2], strings[3], strings[4]);
+     		    			server1.multicast(message);
+     		    			if(flag)
+     		    				reply = "SUCCESS".getBytes();
+     		    			else 
+ 								reply = "FAIL".getBytes();
+     		    			break;
+     		    		case "5":
+     		    			flag = server1.transferRecord(strings[1], strings[2], strings[3]);
+     		    			server1.multicast(message);
+     		    			if(flag)
+     		    				reply = "SUCCESS".getBytes();
+     		    			else 
+ 								reply = "FAIL".getBytes();
+     		    			break;
+     		    		case "7":
+     		    			replyMessage = server1.getRecordInfo(strings[1],strings[2]);
+     		    			reply = replyMessage.getBytes();
+     		    			break;
+     		    		default:
+     		    			System.out.println("error!");
+     		    	}
+//     		    	message="";
+     		    	
+     				try {
+     					System.out.println("reply: "+String.valueOf(reply));
+     					DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, request.getAddress(), request.getPort());
+     					datagramSocket.send(replyPacket);
+     					buffer = new byte[1000];
+     					reply = new byte[1000];
+     					
+     				} catch (IOException e) {
+     					// TODO Auto-generated catch block
+     					e.printStackTrace();
+     				}
+                 }
+             }
+         } catch (Exception e) {
+             System.out.println(e.getMessage());
+         }finally {
+             if(datagramSocket != null)
+                 datagramSocket.close();
+         }
+    	
 	}
     
     
@@ -71,7 +155,7 @@ public class Server1 implements CenterServer  {
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
     	MulticastSocket socket = null;
         try{
-        	System.setProperty("java.net.preferIPv4Stack", "true");
+//        	System.setProperty("java.net.preferIPv4Stack", "true");
         	InetAddress group = InetAddress.getByName("228.5.6.7");
         	socket = new MulticastSocket(6789);
         	socket.joinGroup(group);
@@ -353,7 +437,7 @@ public class Server1 implements CenterServer  {
 		else{
 			 arrayListsSet=LVLServer1.values();
 		}
-		
+		System.out.println("recordID: "+recordID);
         for(ArrayList<Record> recordArrayListSet:arrayListsSet){
             for(Record record:recordArrayListSet){
                 if(record.recordID.equalsIgnoreCase(recordID))
