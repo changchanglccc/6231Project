@@ -47,15 +47,16 @@ public class Server2 implements CenterServer{
     	
 		while(true){
 			// get message from the UdpListener
+			//TODO: if PM crash, set message to something except ""
 			if(server2.getMessage().equals("")){// it is a backup 
-				multicast(server2.getMessage(),server2);
+				server2.multicast(server2.getMessage(),server2);
 			}
-			
+//			server2.setMessage("");
     	
 		}
 	}
 
-    public static void operation(String message,Server2 server2){
+    public void operation(String message,Server2 server2){
 		String[] strings = message.split(",");
     	switch(strings[0]){
     		case "1":
@@ -81,7 +82,7 @@ public class Server2 implements CenterServer{
     	}
 	}
 
-	public static void multicast(String message,Server2 server2){//as a backup
+	public void multicast(String message,Server2 server2){//as a backup
     	
     	//Multicast
     	// args give message contents & destination multicast group (e.g. "228.5.6.7")
