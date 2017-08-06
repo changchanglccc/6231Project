@@ -38,12 +38,11 @@ public class UdpListener2 extends Thread{
 //	            System.out.println(centerServerImp.centerName+"is ready to listen UDP requests between servers");
 	            //listening
 	            while(true){
-	            	message="";
+//	            	message="";
 	                DatagramPacket request = new DatagramPacket(buffer, buffer.length);
 	                datagramSocket.receive(request);
 	                message=new String(request.getData());
-	                System.out.println("updListener: "+getMessage());
-//	                commonServer.setMessage(message);
+	                System.out.println("udpListener: "+getMessage());
 	                server2.setMessage(message);
 
 	                
