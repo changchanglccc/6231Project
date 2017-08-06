@@ -52,15 +52,15 @@ public class FifoUdpListener extends Thread {
     @Override
     public void run() {
 
-        if (sendPortNbrChanged) {
-            try {
-                server_send = new DatagramSocket(SEND_PORT_NUMBER);
-            } catch (SocketException se) {
-                System.err.println(se);
-            }
-        }
-
         while (true) {
+            if (sendPortNbrChanged) {
+                try {
+                    server_send = new DatagramSocket(SEND_PORT_NUMBER);
+                } catch (SocketException se) {
+                    System.err.println(se);
+                }
+            }
+
             final DatagramPacket recvPacket
                     = new DatagramPacket(recvBuf, recvBuf.length);
             try {
