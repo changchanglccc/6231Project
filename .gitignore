@@ -12,6 +12,5 @@ gen
 /bin/
 .DS_Store
 */.DS_Store
-.classpath
-.project
 /src/orb.db/
+

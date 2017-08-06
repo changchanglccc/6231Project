@@ -121,7 +121,7 @@ public class FrontEndImp extends FrontEndPOA{
     @Override
     public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
         boolean flag=false;
-        String messageString="5,"+managerId+","+recordID+remoteCenterServerName;
+        String messageString="5,"+managerId+","+recordID+","+remoteCenterServerName;
         String reply=sentMessage(messageString);
         if(reply.equals("SUCCESS")){
             flag = true;
