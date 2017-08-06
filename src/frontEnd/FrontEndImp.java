@@ -76,7 +76,7 @@ public class FrontEndImp extends FrontEndPOA{
 
 
     public void setPrimaryServer(int primaryPortNo){
-        this.primaryPortNo=primaryPortNo;
+        this.primaryPortNo=5001;
     }
 
     @Override
@@ -121,7 +121,7 @@ public class FrontEndImp extends FrontEndPOA{
     @Override
     public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
         boolean flag=false;
-        String messageString="5,"+managerId+","+recordID+remoteCenterServerName;
+        String messageString="5,"+managerId+","+recordID+","+remoteCenterServerName;
         String reply=sentMessage(messageString);
         if(reply.equals("SUCCESS")){
             flag = true;

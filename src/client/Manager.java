@@ -18,7 +18,7 @@ import org.omg.CosNaming.NamingContextExt;
 public class Manager{
 	private String managerID;
 	private FrontEnd frontEnd;
-	private static File loggingFile=new File("manager.txt");
+	private static File loggingFile=new File("Manager.txt");
 
 
 	public Manager(String managerID){
