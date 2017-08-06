@@ -45,9 +45,11 @@ public class Server1 implements CenterServer  {
     
 	public static void main(String[] args) {
     	int port=5001;
+
 //    	byte[] reply = new byte[1000];
 //    	boolean flag;
 //    	String replyMessage = null;
+
     	
     	Server1 server1 = new Server1();
     	new UdpListener(port,server1).start();
