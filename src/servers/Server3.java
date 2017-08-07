@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+
+import helper.HeartBeat;
+import helper.LeaderElection;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -24,6 +27,7 @@ public class Server3 implements CenterServer{
 	private File loggingFileDDO = new File("DDOServer3.txt");
     private File loggingFileMTL = new File("MTLServer3.txt");
     private File loggingFileLVL = new File("LVLServer3.txt");
+    private static  LeaderElection el;
 
 	public Server3() {
 		this.DDOServer3 = new HashMap<>();
@@ -38,27 +42,13 @@ public class Server3 implements CenterServer{
     	String message = "";
     	boolean flag = false;
     	String replyMessage = "";
+
+    	new HeartBeat(port).startUp();
     	
-//    	new UdpListener3(port,server1).start();
-    	
-//		while(true){
-//			message = commonServer.getMessage();
-////			System.out.println(message);
-//			
-//			if(!message.equals(""))
-//				System.out.println("message: "+message);
-//			else
-//				System.out.println("----");
-//			
-////			if(message.equals("")){// it is a backup 
-////				multicast(message);
-////			}
-////			else{ //become primary replica
-//			
-//			
-//			
-//		}
-    	
+//
+		el=new LeaderElection("Server3","localhost",3,5003,7003);
+
+		//
     	 DatagramSocket datagramSocket = null;
          try {
              //create belonging socket

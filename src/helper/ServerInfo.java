@@ -1,9 +1,5 @@
 package helper;
 
-/**
- * Created by chongli on 2017-08-05.
- */
-
 public class ServerInfo {
     private String name;
     private String IP;

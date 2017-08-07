@@ -16,21 +16,28 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class FrontEndImp extends FrontEndPOA{
+import fifo.FifoUdpListener;
+
+public class FrontEndImp extends FrontEndPOA {
 
     private static FrontEndImp frontEnd;
-    private int primaryPortNo;
+    public static int FIFO_LISTEN_PORT_NBR = 4999;
+    public static int primary_port_nbr = 5001;
+    public static int msgId = 10000;
 
-    private FrontEndImp(){}
+    private FrontEndImp() {
+    }
+
     //singleton
-    public static FrontEndImp getFrontEnd(){
-        if(frontEnd==null)
-            frontEnd=new FrontEndImp();
+    public static FrontEndImp getFrontEnd() {
+        if (frontEnd == null)
+            frontEnd = new FrontEndImp();
         return frontEnd;
     }
 
-    public static void main(String[] args){
-        int frontEndPortNo=5000;
+    public static void main(String[] args) {
+        int frontEndPortNo = 5000;
+
         //config
         BullySelector.getBullySelector().addServer(5001);
         BullySelector.getBullySelector().addServer(5002);
@@ -38,21 +45,23 @@ public class FrontEndImp extends FrontEndPOA{
         BullySelector.getBullySelector().startUp();
 
         //start up the periodical detecting
-        FailureDetector failureDetector=new FailureDetector(frontEndPortNo);
+
+        FailureDetector failureDetector=new FailureDetector();
+
         failureDetector.addServer(5001);
         failureDetector.addServer(5002);
         failureDetector.addServer(5003);
         failureDetector.start();
 
         //run CORBA and listen requests from clients
-        try{
+        try {
             // create and initialize the ORB
             ORB orb = ORB.init(new String[]{"-ORBInitialHost", "localhost", "-ORBInitialPort", "1050"}, null);
             // get reference to rootpoa & activate the POAManager
             POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             rootpoa.the_POAManager().activate();
             // create servant and register it with the ORB
-            FrontEndImp frontEndSurvant=FrontEndImp.getFrontEnd();
+            FrontEndImp frontEndSurvant = FrontEndImp.getFrontEnd();
             // get object reference from the servant
             org.omg.CORBA.Object ref = rootpoa.servant_to_reference(frontEndSurvant);
             FrontEnd href = FrontEndHelper.narrow(ref);
@@ -65,26 +74,34 @@ public class FrontEndImp extends FrontEndPOA{
             String name = "frontEnd";
             NameComponent path[] = ncRef.to_name(name);
             ncRef.rebind(path, href);
+
+            FifoUdpListener fifo = new FifoUdpListener(FIFO_LISTEN_PORT_NBR, primary_port_nbr);
+            fifo.run();
+
             orb.run();
             System.out.println("------");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("ERROR: " + e);
             e.printStackTrace(System.out);
         }
     }
 
 
-    public void setPrimaryServer(int primaryPortNo){
-        this.primaryPortNo=primaryPortNo;
+    public void setPrimaryServer(int primaryPortNo) {
+        this.primary_port_nbr = primaryPortNo;
+    }
+
+    public synchronized int getMsgIdAndIncre() {
+        msgId++;
+        return msgId - 1;
     }
 
     @Override
     public boolean createTRecord(String managerId, String firstName, String lastName, String address, String phone, String specialization, String location) {
         boolean flag = false;
-        String messageString="1,"+managerId+","+firstName+","+lastName+","+address+","+phone+","+specialization+","+location;
-        String reply=sentMessage(messageString);
-        if(reply.equals("SUCCESS")){
+        String messageString = getMsgIdAndIncre() + ",1," + managerId + "," + firstName + "," + lastName + "," + address + "," + phone + "," + specialization + "," + location;
+        String reply = sendMsg2Fifo(messageString);
+        if (reply.equals("SUCCESS")) {
             flag = true;
         }
         return flag;
@@ -92,10 +109,10 @@ public class FrontEndImp extends FrontEndPOA{
 
     @Override
     public boolean createSRecord(String managerId, String firstName, String lastName, String coursesRegistered, String status, String date) {
-        boolean flag=false;
-        String messageString="2,"+managerId+","+firstName+","+lastName+","+coursesRegistered+","+status+","+date;
-        String reply=sentMessage(messageString);
-        if(reply.equals("SUCCESS")){
+        boolean flag = false;
+        String messageString = getMsgIdAndIncre() + ",2," + managerId + "," + firstName + "," + lastName + "," + coursesRegistered + "," + status + "," + date;
+        String reply = sendMsg2Fifo(messageString);
+        if (reply.equals("SUCCESS")) {
             flag = true;
         }
         return flag;
@@ -103,16 +120,16 @@ public class FrontEndImp extends FrontEndPOA{
 
     @Override
     public String getRecordCounts(String managerId) {
-        String messageString="3,"+managerId;
-        return sentMessage(messageString);
+        String messageString = getMsgIdAndIncre() + ",3," + managerId;
+        return sendMsg2Fifo(messageString);
     }
 
     @Override
     public boolean editRecord(String managerId, String recordID, String fieldName, String newValue) {
-        boolean flag=false;
-        String messageString="4,"+managerId+","+recordID+","+fieldName+","+newValue;
-        String reply=sentMessage(messageString);
-        if(reply.equals("SUCCESS")){
+        boolean flag = false;
+        String messageString = getMsgIdAndIncre() + ",4," + managerId + "," + recordID + "," + fieldName + "," + newValue;
+        String reply = sendMsg2Fifo(messageString);
+        if (reply.equals("SUCCESS")) {
             flag = true;
         }
         return flag;
@@ -120,43 +137,43 @@ public class FrontEndImp extends FrontEndPOA{
 
     @Override
     public boolean transferRecord(String managerId, String recordID, String remoteCenterServerName) {
-        boolean flag=false;
-        String messageString="5,"+managerId+","+recordID+","+remoteCenterServerName;
-        String reply=sentMessage(messageString);
-        if(reply.equals("SUCCESS")){
+        boolean flag = false;
+        String messageString = getMsgIdAndIncre() + ",5," + managerId + "," + recordID + "," + remoteCenterServerName;
+        String reply = sendMsg2Fifo(messageString);
+        if (reply.equals("SUCCESS")) {
             flag = true;
         }
         return flag;
     }
 
     @Override
-    public String getRecordInfo(String manageID,String recordID) {
-        String messageString="7,"+manageID+","+recordID;
-        return sentMessage(messageString);
+    public String getRecordInfo(String manageID, String recordID) {
+        String messageString = getMsgIdAndIncre() + ",7," + manageID + "," + recordID;
+        return sendMsg2Fifo(messageString);
     }
 
 
-    private String sentMessage(String messageString){
+    private String sendMsg2Fifo(String messageString) {
         DatagramSocket datagramSocket = null;
-        String replyString=null;
+        String replyString = null;
 
         try {
             datagramSocket = new DatagramSocket();
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
-            DatagramPacket request = new DatagramPacket(message, message.length,host,primaryPortNo);
+            DatagramPacket request = new DatagramPacket(message, message.length, host, FIFO_LISTEN_PORT_NBR);
             datagramSocket.send(request);
 
             //get message
             byte[] buffer = new byte[1000];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             datagramSocket.receive(reply);
-            replyString=new String(reply.getData()).trim();
+            replyString = new String(reply.getData()).trim();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }finally {
-            if(datagramSocket != null)
+        } finally {
+            if (datagramSocket != null)
                 datagramSocket.close();
         }
         return replyString;

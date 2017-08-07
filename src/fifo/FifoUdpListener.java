@@ -3,28 +3,72 @@ package fifo;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class UdpServer {
+public class FifoUdpListener extends Thread {
 
-    private static Lock lock = new ReentrantLock();
-    public static int PORT_NUMBER = 8888;
+    private static Lock lock;
 
-    public static void main(String[] args) throws IOException {
-        final DatagramSocket server = new DatagramSocket(PORT_NUMBER);
-        byte[] recvBuf = new byte[100];
-        Queue<String> queue = new LinkedBlockingQueue<String>();
-        Queue<Thread> threadList = new LinkedBlockingQueue<Thread>();
-        TimerTaskRun timerTaskRun = null;
+    private static int LISTEN_PORT_NUMBER;
+    private static int send_port_number;
+
+    private static boolean sendPortNbrChanged = false;
+
+    public static DatagramSocket server_receive = null;
+    public static DatagramSocket server_send = null;
+
+    public static byte[] recvBuf = null;
+    public static Queue<String> queue = null;
+    public static Queue<Thread> threadList = null;
+    public static TimerTaskRun timerTaskRun = null;
+
+    public FifoUdpListener(int listenPortNbr, int sendPortNbr) {
+        lock = new ReentrantLock();
+
+        LISTEN_PORT_NUMBER = listenPortNbr;
+        send_port_number = sendPortNbr;
+
+        try {
+            server_receive = new DatagramSocket(LISTEN_PORT_NUMBER);
+            server_send = new DatagramSocket(send_port_number);
+        } catch (SocketException se) {
+            System.err.println(se);
+        }
+
+        recvBuf = new byte[100];
+        queue = new LinkedBlockingQueue<String>();
+        threadList = new LinkedBlockingQueue<Thread>();
+    }
+
+    public static void setNewSendPortNumber(int newSendPortNbr) {
+        send_port_number = newSendPortNbr;
+        sendPortNbrChanged = true;
+    }
+
+    @Override
+    public void run() {
 
         while (true) {
+            if (sendPortNbrChanged) {
+                try {
+                    server_send = new DatagramSocket(send_port_number);
+                } catch (SocketException se) {
+                    System.err.println(se);
+                }
+            }
+
             final DatagramPacket recvPacket
                     = new DatagramPacket(recvBuf, recvBuf.length);
-            server.receive(recvPacket);
+            try {
+                server_receive.receive(recvPacket);
+            } catch (IOException ie) {
+                System.err.println(ie);
+            }
+
             String recvStr = (new String(recvPacket.getData(), 0, recvPacket.getLength())).trim();
             System.out.println(recvStr);
             if (null == recvStr || recvStr.equals("")) {
@@ -47,12 +91,11 @@ public class UdpServer {
                         // get the next message
                         final String head = queue.peek();
 
-                        timerTaskRun = new TimerTaskRun(server, head, recvPacket);
+                        timerTaskRun = new TimerTaskRun(server_send, head, recvPacket);
                         Thread thread = new Thread(timerTaskRun);
                         threadList.add(thread);
                         thread.start();
                     }
-                } else {
                 }
             } else {
                 // if it's a task message
@@ -62,7 +105,7 @@ public class UdpServer {
                     lock.unlock();
                     // if the queue was empty, we send the task straight
                     final String head = queue.peek();
-                    timerTaskRun = new TimerTaskRun(server, head, recvPacket);
+                    timerTaskRun = new TimerTaskRun(server_send, head, recvPacket);
                     Thread thread = new Thread(timerTaskRun);
                     threadList.add(thread);
                     thread.start();
@@ -70,19 +113,8 @@ public class UdpServer {
                     lock.unlock();
                 }
             }
+
         }
     }
 
-    // not used, but keep it here for now
-    private static void send(DatagramSocket socket, String sendBuf, DatagramPacket recvPacket) {
-        int port = recvPacket.getPort();
-        InetAddress addr = recvPacket.getAddress();
-        final DatagramPacket sendPacket
-                = new DatagramPacket(sendBuf.getBytes(), sendBuf.length(), addr, port);
-        try {
-            socket.send(sendPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

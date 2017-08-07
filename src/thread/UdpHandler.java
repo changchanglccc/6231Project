@@ -26,7 +26,6 @@ public class UdpHandler extends Thread{
 
     @Override
     public void run() {
-
         if(!message.equals("")){
             byte[] reply=null;
 
@@ -51,12 +50,12 @@ public class UdpHandler extends Thread{
                 case "1":
                     boolean flag = server.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
                     reply = String.valueOf(flag).getBytes();
-                    server.multicast();  //todo:没有把操作multicast
+
                     break;
                 case "2":
                     flag = server.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
                     reply = String.valueOf(flag).getBytes();
-                    server.multicast();
+
                     break;
                 case "3":
                     String replyMessage = server.getRecordCounts(strings[1]);
@@ -65,12 +64,10 @@ public class UdpHandler extends Thread{
                 case "4":
                     flag = server.editRecord(strings[1], strings[2], strings[3], strings[4]);
                     reply = String.valueOf(flag).getBytes();
-                    server.multicast();
                     break;
                 case "5":
                     flag = server.transferRecord(strings[1], strings[2], strings[3]);
                     reply = String.valueOf(flag).getBytes();
-                    server.multicast();
                     break;
                 case "7":
                     replyMessage = server.getRecordInfo(strings[1],strings[2]);
