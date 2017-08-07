@@ -1,13 +1,11 @@
 package helper;
 
-/**
- * Created by chongli on 2017-08-05.
- */
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+
 
 public class ServerListener extends Thread{
     public String serverName ;
@@ -15,22 +13,19 @@ public class ServerListener extends Thread{
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
-        StartListening();
 
+        StartListening();
     }
 
     public ServerListener (String serverName, int leaderElectionPort){
         this.serverName = serverName;
         this.leaderElectionPort = leaderElectionPort;
-
     }
 
 
     private void StartListening(){
-
         try {
-            for(int i = 0; i <100; i++){
+            for(int i = 0; i <100; i++){   //timeout 100 runs
                 Socket incoming = null;
                 ServerSocket s = new ServerSocket(leaderElectionPort);
 
@@ -45,7 +40,6 @@ public class ServerListener extends Thread{
                 scan.close();
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

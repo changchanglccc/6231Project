@@ -8,6 +8,9 @@ import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import fifo.MessageQueue;
+import helper.HeartBeat;
+import helper.LeaderElection;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -20,7 +23,9 @@ public class Server2 implements CenterServer {
     private static Server2[] schoolServersObjs = new Server2[3];   //this server is centerServer actually
     private HashMap<Character,ArrayList<Record>> records;
     private String name;
-
+    private static MessageQueue jobQueue;
+    private boolean isPrimary;
+    private static LeaderElection el;
 
     public Server2(String SchoolServer) {
         this.name = SchoolServer;
@@ -36,20 +41,35 @@ public class Server2 implements CenterServer {
             schoolServersObjs[i]=center;
         }
 
+        el=new LeaderElection("Server2","localhost",2,5002,7002);
 
-        //replica environment
-        int port=5001;
+        //port number
+        int port=5002;
+        //heartbeat
+        new HeartBeat(port).startUp();
+
+        //setup the socket
         DatagramSocket datagramSocket = null;
-        String message;
+
         try {
             datagramSocket = new DatagramSocket(port);
+            InetAddress host = InetAddress.getByName("localhost");
             byte[] buffer = new byte[1000];
+            jobQueue=new MessageQueue(datagramSocket);
+            jobQueue.start();
 
             while(true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(request);
-                message=new String(request.getData());
-                new UdpHandler(request.getAddress(),request.getPort(),datagramSocket,schoolServersObjs,message).run();
+                String message=new String(request.getData());
+
+                if(!message.trim().equals("200")){ //acknowledgment
+
+                    byte[] acknowledge = "200".getBytes();
+                    DatagramPacket acknow = new DatagramPacket(acknowledge, acknowledge.length,host,request.getPort());
+                    datagramSocket.send(acknow);
+                    new UdpHandler(host,port,datagramSocket,schoolServersObjs,message);
+                }
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -57,43 +77,6 @@ public class Server2 implements CenterServer {
         }finally {
             if(datagramSocket != null)
                 datagramSocket.close();
-        }
-
-
-    }
-
-
-    public static void multicast(){
-
-        //Multicast
-        // args give message contents & destination multicast group (e.g. "228.5.6.7")
-        MulticastSocket socket = null;
-        try{
-            System.setProperty("java.net.preferIPv4Stack", "true");
-            InetAddress group = InetAddress.getByName("228.5.6.7");
-            socket = new MulticastSocket(6789);
-            socket.joinGroup(group);
-            byte[] m = "Server2 nihao".getBytes();
-            DatagramPacket messageOut = new DatagramPacket(m, m.length,group,6789);
-
-            byte[] buffer = new byte[1000];
-            for(int i=0;i<=2;i++){  // get messages from others in group
-                System.out.println("receiving");
-                DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
-                socket.receive(messageIn);
-                System.out.println("Recieve:"+ new String(messageIn.getData()));
-                socket.send(messageOut);
-            }
-            System.out.println("Server2");
-            //    	socket.leaveGroup(group);
-        }catch(SocketException e){
-            System.out.println("Socket: " + e.getMessage());
-        }catch (IOException e) {
-            System.out.println("IO: " + e.getMessage());
-        }
-        finally {
-            if(socket != null)
-                socket.close();
         }
     }
 

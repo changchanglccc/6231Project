@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+
+import helper.HeartBeat;
+import helper.LeaderElection;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -24,7 +27,8 @@ public class Server3 implements CenterServer{
     private File loggingFileMTL = new File("MTLServer3.txt");
     private File loggingFileLVL = new File("LVLServer3.txt");
     private int count;
-    
+    private static  LeaderElection el;
+
 	public Server3() {
 		this.DDOServer3 = new HashMap<>();
 		this.MTLServer3 = new HashMap<>();
@@ -48,6 +52,10 @@ public class Server3 implements CenterServer{
     	String replyMessage = "";
     	new UdpListener3(port+2000, server3).start();;
     	
+
+//    	new HeartBeat(port).startUp();
+//		el=new LeaderElection("Server3","localhost",3,5003,7003);
+
     	 DatagramSocket datagramSocket = null;
          try {
              //create belonging socket
@@ -95,9 +103,9 @@ public class Server3 implements CenterServer{
 	                 if(request.getPort() == 4000){ // 该进程是primary
 	//                 if(!message.equals("")){
 	     		    	String[] strings = message.split(",");
-	     		    	switch(strings[0]){
+	     		    	switch(strings[1]){
 	     		    		case "1":
-	     		    			flag = server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+	     		    			flag = server3.createTRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
 	     		    			server3.sentMessage(message, 5001);
 //	     		    			server3.sentMessage(message, 5002);
 	     		    			while(true){ //收到两个acknowledgement时，回复信息
@@ -111,7 +119,7 @@ public class Server3 implements CenterServer{
 	 								reply = "FAIL".getBytes();
 	     		    			break;
 	     		    		case "2":
-	     		    			flag = server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+	     		    			flag = server3.createSRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
 	     		    			server3.sentMessage(message, 5001);
 //	     		    			server3.sentMessage(message, 5002);
 	     		    			while(true){ //收到两个acknowledgement时，回复信息
@@ -125,11 +133,11 @@ public class Server3 implements CenterServer{
 	 								reply = "FAIL".getBytes();
 	     		    			break;
 	     		    		case "3":
-	     		    			replyMessage = server3.getRecordCounts(strings[1]);
+	     		    			replyMessage = server3.getRecordCounts(strings[2]);
 	     		    			reply = replyMessage.getBytes();
 	     		    			break;
 	     		    		case "4":
-	     		    			flag = server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
+	     		    			flag = server3.editRecord(strings[2], strings[3], strings[4], strings[5]);
 	     		    			server3.sentMessage(message, 5001);
 //	     		    			server3.sentMessage(message, 5002);
 	     		    			while(true){ //收到两个acknowledgement时，回复信息
@@ -143,7 +151,7 @@ public class Server3 implements CenterServer{
 	 								reply = "FAIL".getBytes();
 	     		    			break;
 	     		    		case "5":
-	     		    			flag = server3.transferRecord(strings[1], strings[2], strings[3]);
+	     		    			flag = server3.transferRecord(strings[2], strings[3], strings[4]);
 	     		    			server3.sentMessage(message, 5001);
 //	     		    			server3.sentMessage(message, 5002);
 	     		    			while(true){ //收到两个acknowledgement时，回复信息
@@ -157,7 +165,7 @@ public class Server3 implements CenterServer{
 	 								reply = "FAIL".getBytes();
 	     		    			break;
 	     		    		case "7":
-	     		    			replyMessage = server3.getRecordInfo(strings[1],strings[2]);
+	     		    			replyMessage = server3.getRecordInfo(strings[2],strings[3]);
 	     		    			reply = replyMessage.getBytes();
 	     		    			break;
 	     		    		default:
@@ -179,16 +187,16 @@ public class Server3 implements CenterServer{
 	                 }
 	                 else{    //这是一个backup
 	                	 String[] strings = message.split(",");
-	      		    	switch(strings[0]){
+	      		    	switch(strings[1]){
 	      		    		case "1":
-	      		    			flag = server3.createTRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
+	      		    			flag = server3.createTRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7], strings[8]);
 	//      		    			if(flag)
 	//      		    				reply = "SUCCESS".getBytes();
 	//      		    			else 
 	//  								reply = "FAIL".getBytes();
 	      		    			break;
 	      		    		case "2":
-	      		    			flag = server3.createSRecord(strings[1], strings[2], strings[3], strings[4], strings[5], strings[6]);
+	      		    			flag = server3.createSRecord(strings[2], strings[3], strings[4], strings[5], strings[6], strings[7]);
 	//      		    			if(flag)
 	//      		    				reply = "SUCCESS".getBytes();
 	//      		    			else 
@@ -199,14 +207,14 @@ public class Server3 implements CenterServer{
 	//      		    			reply = replyMessage.getBytes();
 	      		    			break;
 	      		    		case "4":
-	      		    			flag = server3.editRecord(strings[1], strings[2], strings[3], strings[4]);
+	      		    			flag = server3.editRecord(strings[2], strings[3], strings[4], strings[5]);
 	//      		    			if(flag)
 	//      		    				reply = "SUCCESS".getBytes();
 	//      		    			else 
 	//  								reply = "FAIL".getBytes();
 	      		    			break;
 	      		    		case "5":
-	      		    			flag = server3.transferRecord(strings[1], strings[2], strings[3]);
+	      		    			flag = server3.transferRecord(strings[2], strings[3], strings[4]);
 	//      		    			if(flag)
 	//      		    				reply = "SUCCESS".getBytes();
 	//      		    			else 

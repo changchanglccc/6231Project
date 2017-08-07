@@ -8,11 +8,10 @@ import java.util.ArrayList;
 public class FailureDetector extends Thread {
     private ArrayList<Integer> replicasList;
     private ArrayList<Integer> heartBeatRecords;
-    private int port;
+    private int port=4999;      //failureDetector special port
     private int runsTolerant=2;
 
-    public FailureDetector(int portNo){
-        this.port=portNo;
+    public FailureDetector(){
         this.replicasList=new ArrayList<Integer>();
         this.heartBeatRecords=new ArrayList<Integer>();
     }
@@ -22,29 +21,42 @@ public class FailureDetector extends Thread {
         heartBeatRecords.add(runsTolerant+1);
     }
 
+    private void removeServer(int index){
+        replicasList.remove(index);
+        heartBeatRecords.remove(index);
+    }
+
     @Override
     public void run() {
         DatagramSocket datagramSocket = null;
+
         try {
             //create belonging socket
             datagramSocket = new DatagramSocket(port);
-            byte[] buffer = new byte[200];
+            byte[] buffer = new byte[500];
 
             //listening heatBeat
             while(true){
                 DatagramPacket heartBeat = new DatagramPacket(buffer, buffer.length);
                 datagramSocket.receive(heartBeat);
-                if(heartBeat.getLength()!=0){
-                    String source=new String(heartBeat.getData());
-                    recording(source);
-                }
+                String source=new String(heartBeat.getData());
+                System.out.println("FailureDetector: [ "+source.trim()+" ] is alive");
+
+                recording(source);
+
                 if(heartBeatRecords.contains(0)){
                     if(!heartBeatRecords.contains(runsTolerant+1)){  //everyone is ok
                         for(int i=0;i<heartBeatRecords.size();i++){
                             heartBeatRecords.set(i,runsTolerant+1);
                         }
                     }else{
-                        int failReplica=heartBeatRecords.indexOf(runsTolerant+1);   //someone fail
+                        int failReplicaIndex=heartBeatRecords.indexOf(runsTolerant+1);   //someone fail
+                        System.out.println("FailureDetector: [ "+replicasList.get(failReplicaIndex)+" ] is crashed !!!");
+                        removeServer(failReplicaIndex);
+
+
+
+
                     }
                 }
             }
@@ -56,7 +68,6 @@ public class FailureDetector extends Thread {
                 datagramSocket.close();
         }
     }
-
 
     public void recording(String source)throws Exception{
         int sourceReplicaNo=Integer.parseInt(source.trim());
@@ -71,6 +82,11 @@ public class FailureDetector extends Thread {
             heartBeatRecords.set(index,heartBeatRecords.get(index)-1);
         else
             System.out.println("FailureDetector: receive invalid heartBeat package");
+    }
+
+
+    public void sentMessageForElection(){
+
     }
 
 }
