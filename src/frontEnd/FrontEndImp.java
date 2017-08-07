@@ -4,6 +4,8 @@ package frontEnd;
 import DCMS.FrontEnd;
 import DCMS.FrontEndHelper;
 import DCMS.FrontEndPOA;
+import fifo.TimerTaskRun;
+
 import org.omg.CORBA.ORB;
 import org.omg.CosNaming.NameComponent;
 import org.omg.CosNaming.NamingContextExt;
@@ -15,6 +17,10 @@ import org.omg.PortableServer.POAHelper;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class FrontEndImp extends FrontEndPOA{
 
@@ -76,7 +82,7 @@ public class FrontEndImp extends FrontEndPOA{
 
 
     public void setPrimaryServer(int primaryPortNo){
-        this.primaryPortNo=primaryPortNo;
+        this.primaryPortNo=5003;
     }
 
     @Override
@@ -139,9 +145,14 @@ public class FrontEndImp extends FrontEndPOA{
     private String sentMessage(String messageString){
         DatagramSocket datagramSocket = null;
         String replyString=null;
+        
+        Queue<String> queue = new LinkedBlockingQueue<String>();
+        Queue<Thread> threadList = new LinkedBlockingQueue<Thread>();
+        TimerTaskRun timerTaskRun = null;
+        Lock lock = new ReentrantLock();
 
         try {
-            datagramSocket = new DatagramSocket();
+            datagramSocket = new DatagramSocket(4000);
             byte[] message = messageString.getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
@@ -152,13 +163,59 @@ public class FrontEndImp extends FrontEndPOA{
             byte[] buffer = new byte[1000];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             datagramSocket.receive(reply);
+            
+            
+//            String recvStr = new String(reply.getData()).trim();
+//            // 200 means all RMs processed the task successfully
+//            if (recvStr.equals("200")) {
+//
+//                // clear the clock
+//                Thread thread2 = threadList.remove();
+//                thread2.stop();
+//                System.out.println("Killed");
+//
+//                // send the next task if any
+//                if (queue.size() != 0) {
+//                    queue.remove();
+//
+//                    if (queue.size() != 0) {
+//                        // get the next message
+//                        final String head = queue.peek();
+//
+//                        timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
+//                        Thread thread = new Thread(timerTaskRun);
+//                        threadList.add(thread);
+//                        thread.start();
+//                    }
+//                } else {
+//                }
+//            } else {
+//                // if it's a task message
+//                lock.lock();
+//                queue.add(recvStr);
+//                if (queue.size() == 1) {
+//                    lock.unlock();
+//                    // if the queue was empty, we send the task straight
+//                    final String head = queue.peek();
+//                    timerTaskRun = new TimerTaskRun(datagramSocket, head, request);
+//                    Thread thread = new Thread(timerTaskRun);
+//                    threadList.add(thread);
+//                    thread.start();
+//                } else {
+//                    lock.unlock();
+//                }
+//            }
+            
+            
             replyString=new String(reply.getData()).trim();
+            System.out.println("reply String:---"+ replyString);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }finally {
             if(datagramSocket != null)
                 datagramSocket.close();
         }
-        return replyString;
+		return replyString;
+        
     }
 }
