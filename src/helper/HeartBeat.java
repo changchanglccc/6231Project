@@ -8,15 +8,15 @@ import java.net.InetAddress;
 import javax.swing.Timer;
 
 
-public class HeartBeat extends Thread implements ActionListener{
+public class HeartBeat implements ActionListener{
 
-    private static int failureDetectorPort=5000;
+    private static int failureDetectorPort=4999;
     private Timer timer;
     private int replicaNo;
 
 
     public HeartBeat(int portNo){
-        this.timer= new Timer(2000,this);
+        this.timer= new Timer(1500,this);
         this.replicaNo=portNo;
     }
 
@@ -30,20 +30,20 @@ public class HeartBeat extends Thread implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        this.start();
+        sentHeartBeat();
     }
 
-    @Override
-    public void run() {
+
+    public void sentHeartBeat() {
         DatagramSocket datagramSocket = null;
         try {
-
             datagramSocket = new DatagramSocket();
             byte[] message = String.valueOf(replicaNo).getBytes();
             InetAddress host = InetAddress.getByName("localhost");
 
             DatagramPacket heartBeatPacket = new DatagramPacket(message, message.length,host,failureDetectorPort);
             datagramSocket.send(heartBeatPacket);
+            System.out.println(replicaNo+"sent a heartbeat");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

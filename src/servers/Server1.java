@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+
+import helper.HeartBeat;
+import helper.LeaderElection;
 import records.Record;
 import records.StudentRecord;
 import records.TeacherRecord;
@@ -25,6 +28,7 @@ public class Server1 implements CenterServer  {
     private File loggingFileMTL = new File("MTLServer1.txt");
     private File loggingFileLVL = new File("LVLServer1.txt");
     private String message;
+    private static LeaderElection el;
     
     public Server1() {
 		DDOServer1 = new HashMap<>();
@@ -44,27 +48,24 @@ public class Server1 implements CenterServer  {
 	}
     
 	public static void main(String[] args) {
-    	int port=5001;
+		int port = 5001;
 
-//    	byte[] reply = new byte[1000];
-//    	boolean flag;
-//    	String replyMessage = null;
 
-    	
-    	Server1 server1 = new Server1();
-    	new UdpListener(port,server1).start();
-    	
-		while(true){ // as a primary
-			// get message from the UdpListener
-			//TODO: if PM crash, set message to something except ""
-			if(server1.getMessage().equals("")){// it is a backup 
-				server1.multicast(server1.getMessage(),server1);
-			}
-//			server1.setMessage("");
-    	
-		}
-		
+		byte[] reply = new byte[1000];
+		boolean flag;
+		String replyMessage = null;
+
+
+		new HeartBeat(port).startUp();
+
+
+		Server1 server1 = new Server1();
+		new UdpListener(port, server1).start();
+
+		el=new LeaderElection("Server1","localhost",1,5001,7001);
+
 	}
+
     
     
     public void operation(String message,Server1 server1){

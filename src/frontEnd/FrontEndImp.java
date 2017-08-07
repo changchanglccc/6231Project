@@ -45,7 +45,9 @@ public class FrontEndImp extends FrontEndPOA {
         BullySelector.getBullySelector().startUp();
 
         //start up the periodical detecting
-        FailureDetector failureDetector = new FailureDetector(frontEndPortNo);
+
+        FailureDetector failureDetector=new FailureDetector();
+
         failureDetector.addServer(5001);
         failureDetector.addServer(5002);
         failureDetector.addServer(5003);
